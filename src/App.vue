@@ -5,10 +5,10 @@
 </template>
 
 <script>
-import MapView from './components/MapView.vue';
+import MapView from "./components/MapView.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     MapView,
   },
@@ -17,9 +17,13 @@ export default {
 
 <style>
 @import "~leaflet/dist/leaflet.css";
-html, body, #app {
+
+html,
+body,
+#app {
   height: 100%;
   margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 </style>
 
