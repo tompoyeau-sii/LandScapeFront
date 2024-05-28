@@ -4,6 +4,9 @@
       <div class="item" v-for="(route, index) in routes" :key="index" @click="selectRoute(route)">
         {{ route.from }} - {{ route.to }}
       </div>
+      <div class="item" @click="stopRoute()">
+        Stopper la recherche
+      </div>
     </div>
   </div>
 </template>
@@ -19,6 +22,9 @@ export default {
   methods: {
     selectRoute(route) {
       this.$emit('selectRoute', route);
+    },
+    stopRoute() {
+      this.$emit('stopRoute');
     }
   }
 }
@@ -51,6 +57,7 @@ export default {
 
 .item {
   background-color: rgb(255, 255, 255);
+  font-weight: bold;
   padding: 1vh;
   border-radius: 20px;
   margin-right: 10px; /* Espace entre les items */

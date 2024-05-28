@@ -1,5 +1,5 @@
 <template>
-  <RouteList :routes="routes" @selectRoute="showRoute"></RouteList>
+  <RouteList :routes="routes" @stopRoute="stopRoute" @selectRoute="showRoute"></RouteList>
   <div id="map" style="height: 100vh"></div>
 </template>
 
@@ -106,6 +106,11 @@ export default {
         }),
       }).addTo(this.map);
     },
+    stopRoute() {
+       if (this.routeControl) {
+       this.map.removeControl(this.routeControl);
+       }
+    }
     // // Ajouter le contrôle de routage
   },
 };
