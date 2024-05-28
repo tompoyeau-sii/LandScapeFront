@@ -50,16 +50,16 @@ export default {
 }
 
 .item {
-  background-color: rgb(216, 214, 214);
+  background-color: rgb(255, 255, 255);
   padding: 1vh;
-  border-radius: 5px;
+  border-radius: 20px;
   margin-right: 10px; /* Espace entre les items */
   white-space: nowrap; /* Empêche les éléments de se casser sur plusieurs lignes */
   color: rgb(78, 78, 78);
 }
 
 .item:hover {
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(226, 225, 225);
 }
 
 .route-list > div {

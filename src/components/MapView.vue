@@ -9,6 +9,9 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import RouteList from "./RouteList.vue";
+import 'leaflet-control-geocoder';
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
+
 // Importer les icônes de Leaflet
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -83,7 +86,24 @@ export default {
         routeWhileDragging: true,
         lineOptions: {
           styles: [{ color: 'blue', opacity: 0.6, weight: 4 }]
-        }
+        },
+        createMarker: function(i, waypoint, n) {
+          return L.marker(waypoint.latLng, {
+            icon: L.icon({
+              iconUrl: markerIcon,
+              iconRetinaUrl: markerIcon2x,
+              shadowUrl: markerShadow,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })
+          });
+        },
+        router: L.Routing.osrmv1({
+          language: 'fr', // Définir la langue en français
+          serviceUrl: 'https://router.project-osrm.org/route/v1'
+        }),
       }).addTo(this.map);
     },
     // // Ajouter le contrôle de routage
