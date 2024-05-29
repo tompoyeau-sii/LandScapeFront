@@ -16,6 +16,10 @@ import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+import startIconUrl from '@/assets/start.png';
+import endIconUrl from '@/assets/end.png';
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -88,12 +92,18 @@ export default {
           styles: [{ color: 'blue', opacity: 0.6, weight: 4 }]
         },
         createMarker: function(i, waypoint, n) {
+          let iconUrl = markerIcon;
+          if (i === 0) {
+            iconUrl = endIconUrl;  // Utiliser l'icône de drapeau pour le point de départ
+          } else if (i === n - 1) {
+            iconUrl = startIconUrl;  // Utiliser l'icône de ligne d'arrivée pour le point d'arrivée
+          }
           return L.marker(waypoint.latLng, {
             icon: L.icon({
-              iconUrl: markerIcon,
-              iconRetinaUrl: markerIcon2x,
+              iconUrl: iconUrl,
+              iconRetinaUrl: iconUrl,
               shadowUrl: markerShadow,
-              iconSize: [25, 41],
+              iconSize: [41, 41],
               iconAnchor: [12, 41],
               popupAnchor: [1, -34],
               shadowSize: [41, 41]
