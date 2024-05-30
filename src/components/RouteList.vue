@@ -86,13 +86,10 @@ export default {
 }
 
 .item {
-  background-color: rgb(255, 255, 255);
   font-weight: bold;
   padding: 1vh;
   border-radius: 20px;
-  margin-right: 10px; /* Espace entre les items */
   white-space: wrap; /* Empêche les éléments de se casser sur plusieurs lignes */
-  color: rgb(78, 78, 78);
 }
 
 .item:hover {

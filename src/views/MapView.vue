@@ -1,6 +1,8 @@
 <template>
   <overlay @stopRoute="stopRoute" @selectRoute="showRoute"></overlay>
-  <div id="map" style="height: 100vh"></div>
+  <div>
+    <div id="map" style="height: 100vh"></div>
+  </div>
 </template>
 
 <script>
@@ -43,41 +45,6 @@ export default {
     return {
       map: null,
       routeControl: null,
-      routes: [
-        {
-          from: "Paris",
-          to: "Louviers",
-          coordinates: [
-            [48.8566, 2.3522],
-            [49.2146, 1.1483],
-          ],
-          waypoints: [
-            [49.0083, 2.5386], // Ajoutez des étapes intermédiaires ici
-          ],
-        },
-        {
-          from: "Le Mans",
-          to: "Laval",
-          coordinates: [
-            [48.0061, 0.1996],
-            [48.0781, -0.7669],
-          ],
-          waypoints: [
-            [48.0333, -0.3333], // Ajoutez des étapes intermédiaires ici
-          ],
-        },
-        {
-          from: "Nantes",
-          to: "Rennes",
-          coordinates: [
-            [47.2184, -1.5536],
-            [48.1173, -1.6778],
-          ],
-          waypoints: [
-            [47.8, -1.5], // Ajoutez des étapes intermédiaires ici
-          ],
-        },
-      ],
     };
   },
   mounted() {
@@ -157,5 +124,4 @@ export default {
   width: 100%;
   height: 100vh;
 }
-
 </style>

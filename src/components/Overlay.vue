@@ -23,8 +23,9 @@ export default {
 
 <style>
 .container {
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   display: flex;
-  width: 40vh;
+  width: 30vh;
   flex-direction: column;
   position: absolute;
   height: 100vh;
