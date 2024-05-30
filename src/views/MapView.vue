@@ -1,4 +1,5 @@
 <template>
+  <SearchView @selectRoute="showRoute" />
   <RouteList :routes="routes" @selectRoute="showRoute"></RouteList>
   <div id="map" style="height: 100vh"></div>
 </template>
@@ -8,7 +9,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import RouteList from "./RouteList.vue";
+import RouteList from "../components/RouteList.vue";
+import SearchView from "../components/SearchComponent.vue";
 // Importer les icônes de Leaflet
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -23,6 +25,7 @@ export default {
   name: "MapView",
   components: {
     RouteList,
+    SearchView
   },
   data() {
     return {
@@ -71,14 +74,15 @@ export default {
       }).addTo(this.map);
     },
     showRoute(route) {
-       if (this.routeControl) {
+      console.log(route)
+      if (this.routeControl) {
         this.map.removeControl(this.routeControl);
       }
       const [start, end] = route.coordinates;
       this.routeControl = L.Routing.control({
         waypoints: [
-          L.latLng(start), // Point de départ (Paris)
-          L.latLng(end), // Point d'arrivée (Tour Eiffel)
+          L.latLng(start), 
+          L.latLng(end),
         ],
         routeWhileDragging: true,
         lineOptions: {
@@ -86,7 +90,6 @@ export default {
         }
       }).addTo(this.map);
     },
-    // // Ajouter le contrôle de routage
   },
 };
 </script>
@@ -97,4 +100,4 @@ export default {
   width: 100%;
   height: 100vh;
 }
-</style>
+</style>./SearchComponent.vue

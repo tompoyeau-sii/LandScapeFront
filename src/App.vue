@@ -1,18 +1,16 @@
 <template>
   <div id="app">
     <MapView />
-    <SearchView />
   </div>
 </template>
 
 <script>
-import MapView from "./components/MapView.vue";
-import SearchView from "./components/SearchView.vue";
+import MapView from "./views/MapView.vue";
+
 export default {
   name: "App",
   components: {
-    MapView,
-    SearchView,
+    MapView
   },
 };
 </script>
@@ -28,4 +26,4 @@ body,
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 </style>
-
+./views/MapView.vue
