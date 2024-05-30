@@ -66,7 +66,8 @@ export default {
 }
 
 .item:hover {
-  background-color: rgb(226, 225, 225);
+  color: white;
+  background-color: blue;
 }
 
 .route-list > div {
