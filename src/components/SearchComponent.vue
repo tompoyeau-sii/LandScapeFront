@@ -13,6 +13,20 @@
                         </ul>
                     </div>
                 </label>
+                <div v-for="(waypoint, index) in waypoints" :key="index">
+                    <label>
+                        <!-- Étape : -->
+                        <input v-model="waypoint.location" placeholder="Ajouter une étape" @input="searchWaypointOptions(index)">
+                        <div v-if="waypoint.options.length">
+                            <ul>
+                                <li v-for="option in waypoint.options" :key="option.place_id" @click="selectWaypointOption(index, option)">
+                                    {{ option.display_name }}
+                                </li>
+                            </ul>
+                        </div>
+                    </label>
+                </div>
+                
                 <label>
                     <!-- Arrivée : -->
                     <input v-model="to" placeholder="Ex: Louviers, France" @input="searchToOptions">
@@ -24,9 +38,9 @@
                         </ul>
                     </div>
                 </label>
+                <button type="button" @click="addWaypoint">Ajouter une étape</button>
             </form>
         </div>
-
     </div>
 </template>
 
@@ -40,8 +54,8 @@ export default {
             to: '',
             fromOptions: [],
             toOptions: [],
-            route: [
-            ]
+            waypoints: [],
+            route: []
         };
     },
     methods: {
@@ -69,9 +83,30 @@ export default {
                 console.error("Erreur lors de la récupération des suggestions pour l'arrivée :", error);
             }
         },
+        addWaypoint() {
+            this.waypoints.push({ location: '', options: [] });
+        },
+        async searchWaypointOptions(index) {
+            const waypoint = this.waypoints[index];
+            if (waypoint.location.length < 3) {
+                waypoint.options = [];
+                return;
+            }
+            try {
+                const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`);
+                this.$set(this.waypoints, index, { ...waypoint, options: response.data });
+            } catch (error) {
+                console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
+            }
+        },
         selectFromOption(option) {
             this.from = option.display_name;
             this.fromOptions = [];
+            this.updateRoute();
+        },
+        selectWaypointOption(index, option) {
+            this.waypoints[index].location = option.display_name;
+            this.waypoints[index].options = [];
             this.updateRoute();
         },
         selectToOption(option) {
@@ -85,11 +120,19 @@ export default {
                     const fromCoords = await this.getCoordinates(this.from);
                     const toCoords = await this.getCoordinates(this.to);
 
-                    this.route.coordinates=[
-                        [fromCoords.lat, fromCoords.lng],
-                        [toCoords.lat, toCoords.lng]
-                    ]
-        
+                    let routeCoordinates = [[fromCoords.lat, fromCoords.lng]];
+
+                    for (let waypoint of this.waypoints) {
+                        if (waypoint.location) {
+                            const waypointCoords = await this.getCoordinates(waypoint.location);
+                            routeCoordinates.push([waypointCoords.lat, waypointCoords.lng]);
+                        }
+                    }
+
+                    routeCoordinates.push([toCoords.lat, toCoords.lng]);
+
+                    this.route.coordinates = routeCoordinates;
+
                     console.log("valeur de l'itinéraire", this.route);
                     this.$emit('selectRoute', this.route);
                 } catch (error) {
