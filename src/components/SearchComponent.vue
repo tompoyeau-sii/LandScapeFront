@@ -87,18 +87,18 @@ export default {
             this.waypoints.push({ location: '', options: [] });
         },
         async searchWaypointOptions(index) {
-            const waypoint = this.waypoints[index];
-            if (waypoint.location.length < 3) {
-                waypoint.options = [];
-                return;
-            }
-            try {
-                const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`);
-                this.$set(this.waypoints, index, { ...waypoint, options: response.data });
-            } catch (error) {
-                console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
-            }
-        },
+    const waypoint = this.waypoints[index];
+    if (waypoint.location.length < 3) {
+        waypoint.options = [];
+        return;
+    }
+    try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`);
+        this.waypoints[index].options = response.data;
+    } catch (error) {
+        console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
+    }
+},
         selectFromOption(option) {
             this.from = option.display_name;
             this.fromOptions = [];
@@ -115,31 +115,35 @@ export default {
             this.updateRoute();
         },
         async updateRoute() {
-            if (this.from && this.to) {
-                try {
-                    const fromCoords = await this.getCoordinates(this.from);
-                    const toCoords = await this.getCoordinates(this.to);
+    if (this.from && this.to) {
+        try {
+            const fromCoords = await this.getCoordinates(this.from);
+            const toCoords = await this.getCoordinates(this.to);
 
-                    let routeCoordinates = [[fromCoords.lat, fromCoords.lng]];
+            // Initialiser l'itinéraire avec les coordonnées de départ et d'arrivée
+            this.route = {
+                coordinates: [
+                    [fromCoords.lat, fromCoords.lng],
+                    [toCoords.lat, toCoords.lng]
+                ],
+                waypoints: []
+            };
 
-                    for (let waypoint of this.waypoints) {
-                        if (waypoint.location) {
-                            const waypointCoords = await this.getCoordinates(waypoint.location);
-                            routeCoordinates.push([waypointCoords.lat, waypointCoords.lng]);
-                        }
-                    }
-
-                    routeCoordinates.push([toCoords.lat, toCoords.lng]);
-
-                    this.route.coordinates = routeCoordinates;
-
-                    console.log("valeur de l'itinéraire", this.route);
-                    this.$emit('selectRoute', this.route);
-                } catch (error) {
-                    console.error("Erreur lors de la récupération de l'itinéraire :", error);
+            // Ajouter les coordonnées des waypoints en tant qu'étapes intermédiaires
+            for (let waypoint of this.waypoints) {
+                if (waypoint.location) {
+                    const waypointCoords = await this.getCoordinates(waypoint.location);
+                    this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
                 }
             }
-        },
+
+            console.log("valeur de l'itinéraire", this.route);
+            this.$emit('selectRoute', this.route);
+        } catch (error) {
+            console.error("Erreur lors de la récupération de l'itinéraire :", error);
+        }
+    }
+},
         async getCoordinates(location) {
             try {
                 const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`);
