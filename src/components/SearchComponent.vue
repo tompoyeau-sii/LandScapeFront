@@ -13,7 +13,13 @@
                         </ul>
                     </div>
                 </label>
-                <div v-for="(waypoint, index) in waypoints" :key="index">
+                <div
+                    v-for="(waypoint, index) in waypoints"
+                    :key="index"
+                    class="waypoint"
+                    :class="{ dragging: dragIndex === index }"
+                    @mousedown="startDrag($event, index)"
+                >
                     <label>
                         <!-- Étape : -->
                         <input v-model="waypoint.location" placeholder="Ajouter une étape" @input="searchWaypointOptions(index)">
@@ -26,7 +32,6 @@
                         </div>
                     </label>
                 </div>
-                
                 <label>
                     <!-- Arrivée : -->
                     <input v-model="to" placeholder="Ex: Louviers, France" @input="searchToOptions">
@@ -55,7 +60,11 @@ export default {
             fromOptions: [],
             toOptions: [],
             waypoints: [],
-            route: []
+            route: [],
+            dragging: false,
+            dragIndex: null,
+            dragOverIndex: null,
+            dragStartY: 0,
         };
     },
     methods: {
@@ -87,18 +96,18 @@ export default {
             this.waypoints.push({ location: '', options: [] });
         },
         async searchWaypointOptions(index) {
-    const waypoint = this.waypoints[index];
-    if (waypoint.location.length < 3) {
-        waypoint.options = [];
-        return;
-    }
-    try {
-        const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`);
-        this.waypoints[index].options = response.data;
-    } catch (error) {
-        console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
-    }
-},
+            const waypoint = this.waypoints[index];
+            if (waypoint.location.length < 3) {
+                waypoint.options = [];
+                return;
+            }
+            try {
+                const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`);
+                this.waypoints[index].options = response.data;
+            } catch (error) {
+                console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
+            }
+        },
         selectFromOption(option) {
             this.from = option.display_name;
             this.fromOptions = [];
@@ -115,35 +124,35 @@ export default {
             this.updateRoute();
         },
         async updateRoute() {
-    if (this.from && this.to) {
-        try {
-            const fromCoords = await this.getCoordinates(this.from);
-            const toCoords = await this.getCoordinates(this.to);
+            if (this.from && this.to) {
+                try {
+                    const fromCoords = await this.getCoordinates(this.from);
+                    const toCoords = await this.getCoordinates(this.to);
 
-            // Initialiser l'itinéraire avec les coordonnées de départ et d'arrivée
-            this.route = {
-                coordinates: [
-                    [fromCoords.lat, fromCoords.lng],
-                    [toCoords.lat, toCoords.lng]
-                ],
-                waypoints: []
-            };
+                    // Initialiser l'itinéraire avec les coordonnées de départ et d'arrivée
+                    this.route = {
+                        coordinates: [
+                            [fromCoords.lat, fromCoords.lng],
+                            [toCoords.lat, toCoords.lng]
+                        ],
+                        waypoints: []
+                    };
 
-            // Ajouter les coordonnées des waypoints en tant qu'étapes intermédiaires
-            for (let waypoint of this.waypoints) {
-                if (waypoint.location) {
-                    const waypointCoords = await this.getCoordinates(waypoint.location);
-                    this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
+                    // Ajouter les coordonnées des waypoints en tant qu'étapes intermédiaires
+                    for (let waypoint of this.waypoints) {
+                        if (waypoint.location) {
+                            const waypointCoords = await this.getCoordinates(waypoint.location);
+                            this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
+                        }
+                    }
+
+                    console.log("valeur de l'itinéraire", this.route);
+                    this.$emit('selectRoute', this.route);
+                } catch (error) {
+                    console.error("Erreur lors de la récupération de l'itinéraire :", error);
                 }
             }
-
-            console.log("valeur de l'itinéraire", this.route);
-            this.$emit('selectRoute', this.route);
-        } catch (error) {
-            console.error("Erreur lors de la récupération de l'itinéraire :", error);
-        }
-    }
-},
+        },
         async getCoordinates(location) {
             try {
                 const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`);
@@ -157,6 +166,34 @@ export default {
                 console.error("Erreur lors de la récupération des coordonnées :", error);
                 throw error;
             }
+        },
+        startDrag(event, index) {
+            this.dragging = true;
+            this.dragIndex = index;
+            this.dragStartY = event.clientY;
+            document.addEventListener('mousemove', this.onDrag);
+            document.addEventListener('mouseup', this.endDrag);
+        },
+        onDrag(event) {
+            if (!this.dragging) return;
+
+            const dragOverElement = document.elementFromPoint(event.clientX, event.clientY);
+            const newDragOverIndex = [...dragOverElement.parentElement.children].indexOf(dragOverElement);
+
+            if (newDragOverIndex !== this.dragOverIndex) {
+                this.dragOverIndex = newDragOverIndex;
+                const draggedItem = this.waypoints.splice(this.dragIndex, 1)[0];
+                this.waypoints.splice(this.dragOverIndex, 0, draggedItem);
+                this.dragIndex = this.dragOverIndex;
+            }
+        },
+        endDrag() {
+            this.dragging = false;
+            this.dragIndex = null;
+            this.dragOverIndex = null;
+            document.removeEventListener('mousemove', this.onDrag);
+            document.removeEventListener('mouseup', this.endDrag);
+            this.updateRoute();
         }
     }
 };
@@ -195,5 +232,14 @@ export default {
     width: 200px;
     padding: 5px;
     margin-bottom: 10px;
+}
+
+.waypoint {
+    cursor: move;
+    user-select: none;
+}
+
+.dragging {
+    background-color: #f0f0f0;
 }
 </style>
