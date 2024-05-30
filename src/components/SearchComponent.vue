@@ -1,34 +1,36 @@
 <template>
     <div>
-        <div class="route-input">
+        <div class="overlay">
             <form>
-                <label>
-                    <!-- Départ : -->
-                    <input v-model="from" placeholder="Départ" @input="searchFromOptions">
-                    <div v-if="fromOptions.length">
-                        <ul>
-                            <li v-for="option in fromOptions" :key="option.place_id" @click="selectFromOption(option)">
+                <div class="input-container">
+                    <label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input class="input-start" v-model="from" placeholder="Départ" @input="searchFromOptions">
+                        </div>
+                        <div class="town-list" v-if="fromOptions.length">
+                            <p class="list-element" v-for="option in fromOptions" :key="option.place_id" @click="selectFromOption(option)">
                                 {{ option.display_name }}
-                            </li>
-                        </ul>
-                    </div>
-                </label>
-                <label>
-                    <!-- Arrivée : -->
-                    <input v-model="to" placeholder="Destination" @input="searchToOptions">
-                    <div v-if="toOptions.length">
-                        <ul>
-                            <li v-for="option in toOptions" :key="option.place_id" @click="selectToOption(option)">
+                            </p>
+                        </div>
+                    </label>
+                    <label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <input class="input-end" v-model="to" placeholder="Destination" @input="searchToOptions">
+                        </div>
+                        <div class="town-list" v-if="toOptions.length">
+                            <p class="list-element" v-for="option in toOptions" :key="option.place_id" @click="selectToOption(option)">
                                 {{ option.display_name }}
-                            </li>
-                        </ul>
-                    </div>
-                </label>
+                            </p>
+                        </div>
+                    </label>
+                </div>
             </form>
         </div>
-
     </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -40,8 +42,7 @@ export default {
             to: '',
             fromOptions: [],
             toOptions: [],
-            route: [
-            ]
+            route: []
         };
     },
     methods: {
@@ -85,11 +86,11 @@ export default {
                     const fromCoords = await this.getCoordinates(this.from);
                     const toCoords = await this.getCoordinates(this.to);
 
-                    this.route.coordinates=[
+                    this.route.coordinates = [
                         [fromCoords.lat, fromCoords.lng],
                         [toCoords.lat, toCoords.lng]
-                    ]
-        
+                    ];
+
                     console.log("valeur de l'itinéraire", this.route);
                     this.$emit('selectRoute', this.route);
                 } catch (error) {
@@ -116,37 +117,81 @@ export default {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
-.custom-font {
-    font-family: 'Roboto', sans-serif;
+.input-container {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
 }
 
-.leaflet-container {
-    z-index: 1;
-    height: 100vh;
-    width: 100%;
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
-.route-input {
+.town-list {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: white;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.list-element {
     padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+    cursor: pointer;
 }
 
-.route-input label {
-    display: block;
-    margin-bottom: 5px;
+.list-element:hover {
+    background-color: #f0f0f0;
+    text-decoration: underline;
 }
 
-.route-input input {
-    width: 200px;
+.overlay label {
+        display: flex;
+    background-color: white;
+    padding: 1vh;
+    border-radius: 25px;
+    align-items: center;
+    margin: 10px;
+    border: 1px solid black;
+    flex-direction: column;
+}
+
+.overlay label i {
+    margin-right: 5px;
+}
+
+.input-start {
+    border: none;
+    border-bottom: 1px solid rgb(180, 180, 180);
     padding: 5px;
-    margin-bottom: 10px;
+    transition: width 0.3s;
+}
+
+.input-start:focus {
+    width: 300px;
+    outline: none;
+}
+
+.input-end {
+    border: none;
+    border-bottom: 1px solid rgb(180, 180, 180);
+    width: 100%;
+    padding: 5px;
+    transition: width 0.3s;
+}
+
+.input-end:focus {
+    width: 300px;
+    outline: none;
 }
 </style>

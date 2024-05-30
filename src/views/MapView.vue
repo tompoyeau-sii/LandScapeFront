@@ -1,10 +1,5 @@
 <template>
-  <SearchView @selectRoute="showRoute" />
-  <RouteList
-    :routes="routes"
-    @stopRoute="stopRoute"
-    @selectRoute="showRoute"
-  ></RouteList>
+  <overlay @stopRoute="stopRoute" @selectRoute="showRoute"></overlay>
   <div id="map" style="height: 100vh"></div>
 </template>
 
@@ -28,6 +23,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import startIconUrl from "@/assets/start.png";
 import stepIconUrl from "@/assets/step.png";
 import endIconUrl from "@/assets/end.png";
+import Overlay from "@/components/Overlay.vue";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -41,6 +37,7 @@ export default {
   components: {
     RouteList,
     SearchView,
+    Overlay,
   },
   data() {
     return {
@@ -88,7 +85,9 @@ export default {
   },
   methods: {
     initializeMap() {
-      this.map = L.map("map").setView([48.0061, 0.1996], 8);
+      this.map = L.map("map", {
+        zoomControl: false,
+      }).setView([48.0061, 0.1996], 8);
       L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
         maxZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
@@ -99,7 +98,7 @@ export default {
         this.map.removeControl(this.routeControl);
       }
 
-      let waypoints= [];
+      let waypoints = [];
 
       if (route.waypoints) {
         waypoints = [
@@ -159,8 +158,4 @@ export default {
   height: 100vh;
 }
 
-.leaflet-routing-container {
-  z-index: 10;
-  background-color: black;
-}
 </style>
