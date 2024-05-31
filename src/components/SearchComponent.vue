@@ -123,6 +123,9 @@ export default {
         selectFromOption(option) {
             this.from = option.display_name;
             this.fromOptions = [];
+            this.fromCity = option.display_name; // Ajout de cette ligne
+            this.fromLatitude = parseFloat(option.lat); // Ajout de cette ligne
+            this.fromLongitude = parseFloat(option.lon); // Ajout de cette ligne
             this.updateRoute();
         },
         selectWaypointOption(index, option) {
@@ -349,5 +352,3 @@ button:hover {
     background-color: #555;
 }
 </style>
-
-           
