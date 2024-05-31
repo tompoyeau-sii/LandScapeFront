@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <search-component @selectRoute="selectRoute"></search-component>
-    <route-list @stopRoute="stopRoute" @selectRoute="selectRoute"></route-list>
+    <search-component @stopRoute="stopRoute" @selectRoute="selectRoute"></search-component>
+    <!-- <route-list @stopRoute="stopRoute" @selectRoute="selectRoute"></route-list> -->
   </div>
 </template>
 
