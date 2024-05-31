@@ -1,7 +1,8 @@
 <template>
-  <SearchView @selectRoute="showRoute" />
-  <RouteList :routes="routes" @selectRoute="showRoute"></RouteList>
-  <div id="map" style="height: 100vh"></div>
+  <overlay @stopRoute="stopRoute" @selectRoute="showRoute"></overlay>
+  <div>
+    <div id="map" style="height: 100vh"></div>
+  </div>
 </template>
 
 <script>
@@ -24,7 +25,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import startIconUrl from "@/assets/start.png";
 import stepIconUrl from "@/assets/step.png";
 import endIconUrl from "@/assets/end.png";
-
+import Overlay from "@/components/Overlay.vue";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -32,42 +33,18 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
 export default {
   name: "MapView",
   components: {
     RouteList,
-    SearchView
+    SearchView,
+    Overlay,
   },
   data() {
     return {
       map: null,
       routeControl: null,
-      routes: [
-        {
-          from: "Paris",
-          to: "Louviers",
-          coordinates: [
-            [48.8566, 2.3522],
-            [49.2146, 1.1483],
-          ],
-        },
-        {
-          from: "Le Mans",
-          to: "Laval",
-          coordinates: [
-            [48.0061, 0.1996],
-            [48.0781, -0.7669],
-          ],
-        },
-        {
-          from: "Nantes",
-          to: "Rennes",
-          coordinates: [
-            [47.2184, -1.5536],
-            [48.1173, -1.6778],
-          ],
-        },
-      ],
     };
   },
   mounted() {
@@ -75,10 +52,9 @@ export default {
   },
   methods: {
     initializeMap() {
-      // Initialiser la carte
-      this.map = L.map("map").setView([48.0061, 0.1996], 8);
-
-      // Ajouter les tuiles Google Maps
+      this.map = L.map("map", {
+        zoomControl: false,
+      }).setView([48.0061, 0.1996], 8);
       L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
         maxZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
@@ -133,6 +109,11 @@ export default {
         }),
       }).addTo(this.map);
     },
+    stopRoute() {
+      if (this.routeControl) {
+        this.map.removeControl(this.routeControl);
+      }
+    },
   },
 };
 </script>
@@ -143,4 +124,4 @@ export default {
   width: 100%;
   height: 100vh;
 }
-</style>./SearchComponent.vue
+</style>

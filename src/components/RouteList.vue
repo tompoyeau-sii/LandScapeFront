@@ -4,9 +4,15 @@
 
 
     <div class="route-list">
-      <div class="item" v-for="(route, index) in routes" :key="index" @click="selectRoute(route)">
+      <div
+        class="item"
+        v-for="(route, index) in routes"
+        :key="index"
+        @click="selectRoute(route)"
+      >
         {{ route.from }} - {{ route.to }}
       </div>
+      <div class="item" @click="stopRoute()">Stopper la recherche</div>
     </div>
   </div>
 </template>
@@ -17,53 +23,82 @@ export default {
   props: {
     routes: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
+  },
+   data() {
+    return {
+      routes: [
+        {
+          from: "Paris",
+          to: "Louviers",
+          coordinates: [
+            [48.8566, 2.3522],
+            [49.2146, 1.1483],
+          ],
+          waypoints: [
+            [49.0083, 2.5386], // Ajoutez des étapes intermédiaires ici
+          ],
+        },
+        {
+          from: "Le Mans",
+          to: "Laval",
+          coordinates: [
+            [48.0061, 0.1996],
+            [48.0781, -0.7669],
+          ],
+          waypoints: [
+            [48.0333, -0.3333], // Ajoutez des étapes intermédiaires ici
+          ],
+        },
+        {
+          from: "Nantes",
+          to: "Rennes",
+          coordinates: [
+            [47.2184, -1.5536],
+            [48.1173, -1.6778],
+          ],
+          waypoints: [
+            [47.8, -1.5], // Ajoutez des étapes intermédiaires ici
+          ],
+        },
+      ],
+    };
   },
   methods: {
     selectRoute(route) {
-      this.$emit('selectRoute', route);
-    }
-  }
-}
+      this.$emit("selectRoute", route);
+    },
+    stopRoute() {
+      this.$emit("stopRoute");
+    },
+  },
+};
 </script>
 
 <style scoped>
-.overlay {
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* Alignement en haut de l'écran */
-  pointer-events: none; /* Permettre les clics à travers l'overlay */
-}
 
 .route-list {
-  display: flex; /* Disposer les éléments en ligne */
-  z-index: 10;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 20px; /* Espace au-dessus de la liste pour qu'elle soit légèrement en dessous du haut de l'écran */
-  pointer-events: auto; /* Activer les clics sur la liste */
-  overflow-x: auto; /* Ajoute une barre de défilement horizontale si nécessaire */
-  max-width: 90%; /* Limite la largeur de la liste */
+     display: flex;
+    z-index: 10;
+    border-radius: 5px;
+    pointer-events: auto;
+    overflow-x: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 .item {
-  background-color: rgb(216, 214, 214);
+  font-weight: bold;
   padding: 1vh;
-  border-radius: 5px;
-  margin-right: 10px; /* Espace entre les items */
-  white-space: nowrap; /* Empêche les éléments de se casser sur plusieurs lignes */
-  color: rgb(78, 78, 78);
+  border-radius: 20px;
+  white-space: wrap; /* Empêche les éléments de se casser sur plusieurs lignes */
 }
 
 .item:hover {
-  background-color: rgb(255, 255, 255);
+  color: white;
+  background-color: blue;
 }
 
 .route-list > div {
