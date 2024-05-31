@@ -205,7 +205,10 @@ export default {
 
             const dragOverElement = document.elementFromPoint(event.clientX, event.clientY);
             const newDragOverIndex = [...dragOverElement.parentElement.children].indexOf(dragOverElement);
-            if (newDragOverIndex !== this.dragOverIndex) {
+
+            console.log(`Dragging over index: ${newDragOverIndex}, Current drag index: ${this.dragIndex}`);
+
+            if (newDragOverIndex !== this.dragOverIndex && newDragOverIndex >= 0 && newDragOverIndex < this.waypoints.length) {
                 this.dragOverIndex = newDragOverIndex;
                 const draggedItem = this.waypoints.splice(this.dragIndex, 1)[0];
                 this.waypoints.splice(this.dragOverIndex, 0, draggedItem);
