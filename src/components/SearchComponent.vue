@@ -1,14 +1,12 @@
 <template>
   <form>
     <div class="input-container">
-      <label>
         <div class="input-wrapper">
           <i class="fas fa-map-marker-alt"></i>
           <input
-            class="input-start"
-            v-model="from"
-            placeholder="Départ"
-            @input="searchFromOptions"
+          v-model="from"
+          placeholder="Départ"
+          @input="searchFromOptions"
           />
         </div>
         <div class="town-list" v-if="fromOptions.length">
@@ -21,12 +19,9 @@
             {{ option.display_name }}
           </p>
         </div>
-      </label>
-      <label>
         <div class="input-wrapper">
           <i class="fas fa-map-marker-alt"></i>
           <input
-            class="input-end"
             v-model="to"
             placeholder="Destination"
             @input="searchToOptions"
@@ -42,7 +37,6 @@
             {{ option.display_name }}
           </p>
         </div>
-      </label>
     </div>
   </form>
 </template>
@@ -155,17 +149,13 @@ export default {
 
 .input-container {
   display: flex;
-  align-items: baseline;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: stretch;
+  flex-direction: column;
 }
 
 .input-wrapper {
   display: flex;
-  z-index: 10;
-  align-items: center;
-  position: relative;
+  align-items: center;  
+  justify-content: center;
 }
 
 .town-list {
@@ -177,14 +167,12 @@ export default {
   border-top: none;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .list-element {
   padding: 10px;
   cursor: pointer;
-  border: none;
 }
 
 .list-element:hover {
@@ -192,42 +180,13 @@ export default {
   text-decoration: underline;
 }
 
-label {
-  display: flex;
-  background-color: white;
-  padding: 1vh;
-  border-radius: 25px;
-  align-items: stretch;
-  margin: 10px;
-  border: 1px solid black;
-  flex-direction: column;
-  width: 100%;
-}
-
-label i {
-  margin-right: 5px;
-}
-
-.input-start {
-  border: none;
-   font-size: large;
+input { 
+  border: 1px solid rgb(209, 208, 208);
+  border-radius: 20px;
   padding: 5px;
-  transition: width 0.3s;
-}
-
-.input-start:focus {
-  outline: none;
-}
-
-.input-end {
-  border: none;
+  margin: 5px;
   font-size: large;
-  width: 100%;
-  padding: 5px;
   transition: width 0.3s;
-}
-
-.input-end:focus {
   outline: none;
 }
 </style>

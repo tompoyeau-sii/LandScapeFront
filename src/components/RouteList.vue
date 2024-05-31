@@ -22,7 +22,7 @@ export default {
       required: true,
     },
   },
-   data() {
+  data() {
     return {
       routes: [
         {
@@ -73,20 +73,19 @@ export default {
 </script>
 
 <style scoped>
-
 .route-list {
-     display: flex;
-    z-index: 10;
-    border-radius: 5px;
-    pointer-events: auto;
-    overflow-x: auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
+  display: flex;
+  border-radius: 5px;
+  pointer-events: auto;
+  overflow-x: auto;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
 }
 
 .item {
-  font-weight: bold;
+  font-weight:500;
   padding: 1vh;
   border-radius: 20px;
   white-space: wrap; /* Empêche les éléments de se casser sur plusieurs lignes */
