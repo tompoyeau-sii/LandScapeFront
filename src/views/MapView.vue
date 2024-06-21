@@ -6,8 +6,6 @@
 </template>
 
 <script>
-import RouteList from "../components/RouteList.vue";
-import SearchView from "../components/SearchComponent.vue";
 
 //Import Leaflet
 import L from "leaflet";
@@ -37,8 +35,6 @@ L.Icon.Default.mergeOptions({
 export default {
   name: "MapView",
   components: {
-    RouteList,
-    SearchView,
     Overlay,
   },
   data() {
@@ -83,7 +79,7 @@ export default {
       this.routeControl = L.Routing.control({
         waypoints: waypoints,
         lineOptions: {
-          styles: [{ color: "blue", opacity: 0.6, weight: 4 }],
+          styles: [{ color: "blue", opacity: 0.6, weight: 3 }],
         },
         createMarker: function (i, waypoint, n) {
           let iconUrl = markerIcon;

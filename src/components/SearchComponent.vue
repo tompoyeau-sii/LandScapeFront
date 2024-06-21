@@ -1,32 +1,22 @@
 <template>
+  <h3>WecanScape</h3>
   <form>
     <!-- Départ -->
     <div class="input-container">
       <div>
         <div class="input-wrapper">
           <i
-            class="fas fa-map-marker-alt"
+            class="fas fa-map-marker-alt searchIcon"
             @click="useCurrentLocation('from')"
           ></i>
           <input
             v-model="from"
             placeholder="Départ"
-            @input="searchFromOptions"
             @focus="showFromList"
-            @blur="hideFromList"
           />
         </div>
-        <div class="town-list" v-if="fromOptions.length && fromListVisible">
-          <p
-            class="list-element"
-            v-for="option in fromOptions"
-            :key="option.place_id"
-            @click="selectFromOption(option)"
-          >
-            {{ option.display_name }}
-          </p>
-        </div>
       </div>
+
       <!-- Étapes -->
       <div
         v-for="(waypoint, index) in waypoints"
@@ -36,67 +26,82 @@
       >
         <div class="waypoint">
           <div class="input-wrapper">
-            <i class="far fa-regular fa-circle"></i>
+            <i class="far fa-regular fa-circle searchIcon"></i>
             <input
               class="input-waypoint"
               v-model="waypoint.location"
               placeholder="Ajouter une étape"
               @input="searchWaypointOptions(index)"
             />
+            <button class="remove-button" @click="removeWaypoint(index)">
+              <i
+                :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"
+              ></i>
+            </button>
           </div>
-          <div class="town-list" v-if="waypoint.options.length">
-            <p
-              class="list-element"
-              v-for="option in waypoint.options"
-              :key="option.place_id"
-              @click="selectWaypointOption(index, option)"
-            >
-              {{ option.display_name }}
-            </p>
-          </div>
-          <button class="remove-button" @click="removeWaypoint(index)">
-            <i :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"></i>
-          </button>
         </div>
-      </div>
-      <!-- Destination -->
-      <div>
-        <div class="input-wrapper">
-          <i class="fas fa-flag-checkered"></i>
-          <input
-            v-model="to"
-            placeholder="Destination"
-            @input="searchToOptions"
-            @focus="showToList"
-            @blur="hideToList"
-          />
-        </div>
-        <div class="town-list" v-if="toOptions.length && toListVisible">
+        <div class="town-list" v-if="waypoint.options.length">
           <p
             class="list-element"
-            v-for="option in toOptions"
+            v-for="option in waypoint.options"
             :key="option.place_id"
-            @click="selectToOption(option)"
+            @click="selectWaypointOption(index, option)"
           >
             {{ option.display_name }}
           </p>
         </div>
       </div>
-      <button class="add-waypoint" type="button" @click="addWaypoint">
+
+      <!-- Destination -->
+      <div>
+        <div class="input-wrapper">
+          <i class="fas fa-flag-checkered searchIcon"></i>
+          <input
+            v-model="to"
+            placeholder="Destination"
+            @focus="showToList"
+          />
+        </div>
+      </div>
+
+      <!-- Ajouter une Étapes -->
+      <button
+        v-if="from && to"
+        class="add-waypoint"
+        type="button"
+        @click="addWaypoint"
+      >
         <i class="fas fa-plus"></i>
         Ajouter une étape
       </button>
+      <!-- Arrêter la recherche -->
       <a v-if="from && to" class="stopSearch" @click="stopRoute()">
         Stopper la recherche
       </a>
+    </div>
+    <div v-if="showFromOptions">
+      <town
+        :searchOption="from"
+        type="from"
+        @option-selected="handleOptionSelected"
+      />
+    </div>
+    <div v-if="showToOptions">
+      <town
+        :searchOption="to"
+        type="to"
+        @option-selected="handleOptionSelected"
+      />
     </div>
   </form>
 </template>
 
 <script>
 import axios from "axios";
+import town from "./TownList.vue";
 
 export default {
+  components: { town },
   data() {
     return {
       from: "",
@@ -104,7 +109,6 @@ export default {
       fromLatitude: 0,
       fromLongitude: 0,
       to: "",
-      fromOptions: [],
       toOptions: [],
       waypoints: [],
       route: [],
@@ -112,43 +116,11 @@ export default {
       dragIndex: null,
       dragOverIndex: null,
       dragStartY: 0,
+      showFromOptions: false,
+      showToOptions: false,
     };
   },
   methods: {
-    async searchFromOptions() {
-      if (this.from.length < 3) {
-        this.fromOptions = [];
-        return;
-      }
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${this.from}`
-        );
-        this.fromOptions = response.data;
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des suggestions pour le départ :",
-          error
-        );
-      }
-    },
-    async searchToOptions() {
-      if (this.to.length < 3) {
-        this.toOptions = [];
-        return;
-      }
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${this.to}`
-        );
-        this.toOptions = response.data;
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des suggestions pour l'arrivée :",
-          error
-        );
-      }
-    },
     addWaypoint() {
       this.waypoints.push({ location: "", options: [] });
     },
@@ -176,22 +148,22 @@ export default {
         );
       }
     },
-    selectFromOption(option) {
-      this.from = option.display_name;
-      this.fromOptions = [];
-      this.fromCity = option.display_name; // Ajout de cette ligne
-      this.fromLatitude = parseFloat(option.lat); // Ajout de cette ligne
-      this.fromLongitude = parseFloat(option.lon); // Ajout de cette ligne
-      this.updateRoute();
-    },
     selectWaypointOption(index, option) {
       this.waypoints[index].location = option.display_name;
       this.waypoints[index].options = [];
       this.updateRoute();
     },
-    selectToOption(option) {
-      this.to = option.display_name;
-      this.toOptions = [];
+    async handleOptionSelected({ option, type }) {
+      if (type === "from") {
+        this.from = option.display_name;
+        this.fromCity = option.display_name;
+        this.fromLatitude = parseFloat(option.lat);
+        this.fromLongitude = parseFloat(option.lon);
+        this.showFromOptions = false;
+      } else if (type === "to") {
+        this.to = option.display_name;
+        this.showToOptions = false;
+      }
       this.updateRoute();
     },
     async updateRoute() {
@@ -342,20 +314,10 @@ export default {
       (this.waypoints = []), this.$emit("stopRoute");
     },
     showFromList() {
-      this.fromListVisible = true;
-    },
-    hideFromList() {
-      setTimeout(() => {
-        this.fromListVisible = false;
-      }, 200);
+      this.showFromOptions = true;
     },
     showToList() {
-      this.toListVisible = true;
-    },
-    hideToList() {
-      setTimeout(() => {
-        this.toListVisible = false;
-      }, 200);
+      this.showToOptions = true;
     },
   },
 };
@@ -373,50 +335,36 @@ export default {
 .input-wrapper {
   display: flex;
   align-items: center;
+  position: relative;
   border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  background-color: #f0f0f0;
   padding: 1vh;
   margin: 1vh;
-  justify-content: center;
+  justify-content: flex-start;
+}
+
+.searchIcon {
+  color: #b4b4b4;
+}
+
+.input-waypoint {
+  flex: 1;
+  padding-right: 2em; /* Adjust this to make room for the button */
 }
 
 input {
   border: none;
   padding: 5px;
   font-size: large;
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
   transition: width 0.3s;
-}
-
-input {
+  background-color: transparent;
   outline: none;
 }
 
-.town-list {
-  border-radius: 5px;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: 1vh;
-  margin: 1vh;
-  z-index: 1000;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  position: absolute;
-}
-
-.list-element {
-  padding: 10px;
-  cursor: pointer;
-  border: none;
-  font-weight: bold;
-  font-size: small;
-}
-
-.list-element:hover {
-  background-color: #f0f0f0;
-  text-decoration: underline;
+input::placeholder {
+  color: #424242;
 }
 
 .stopSearch {
@@ -434,10 +382,12 @@ input {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  justify-content: space-evenly;
 }
 
 .dragging {
   background-color: #f0f0f0;
+  border-radius: 15px;
 }
 
 .add-waypoint {
@@ -454,14 +404,28 @@ input {
 }
 
 .remove-button {
-  padding: 1vh;
-  border-radius: 10px;
-  margin: 1vh;
+  position: absolute;
+  right: 0.5em; /* Adjust this value as needed */
   background: none;
   border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-button i {
+  pointer-events: none;
 }
 
 .remove-button:hover {
   background-color: #f0f0f0;
+}
+
+h3 {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  margin-bottom: 0px;
 }
 </style>

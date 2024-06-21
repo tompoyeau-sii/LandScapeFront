@@ -1,15 +1,16 @@
 <template>
   <div class="container">
-    <search-component @stopRoute="stopRoute" @selectRoute="selectRoute"></search-component>
-    <!-- <route-list @stopRoute="stopRoute" @selectRoute="selectRoute"></route-list> -->
+    <search-component
+      @stopRoute="stopRoute"
+      @selectRoute="selectRoute"
+    ></search-component>
   </div>
 </template>
 
 <script>
-import RouteList from "./RouteList.vue";
 import SearchComponent from "./SearchComponent.vue";
 export default {
-  components: { RouteList, SearchComponent },
+  components: { SearchComponent },
   methods: {
     selectRoute(route) {
       this.$emit("selectRoute", route);
@@ -28,9 +29,11 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  height: 100vh;
+  margin: 1%;
+  border-radius: 15px;
   background-color: white;
   z-index: 2;
   align-items: stretch;
+  width: 17%;
 }
 </style>
