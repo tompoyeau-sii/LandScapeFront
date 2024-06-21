@@ -4,16 +4,16 @@
     <!-- Départ -->
     <div class="input-container">
       <div>
-        <div class="input-wrapper">
-          <i
-            class="fas fa-map-marker-alt searchIcon"
-            @click="useCurrentLocation('from')"
-          ></i>
-          <input
-            v-model="from"
-            placeholder="Départ"
-            @focus="showFromList"
-          />
+        <div class="waypoint">
+          <div class="input-wrapper">
+            <i
+              class="fas fa-map-marker-alt searchIcon"
+            ></i>
+            <input class="input-waypoint" v-model="from" placeholder="Départ" @focus="showFromList" />
+            <button class="remove-button" @click.prevent="useCurrentLocation('from')">
+              <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -33,7 +33,7 @@
               placeholder="Ajouter une étape"
               @input="searchWaypointOptions(index)"
             />
-            <button class="remove-button" @click="removeWaypoint(index)">
+            <button class="remove-button" @click.prevent="removeWaypoint(index)">
               <i
                 :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"
               ></i>
@@ -56,11 +56,7 @@
       <div>
         <div class="input-wrapper">
           <i class="fas fa-flag-checkered searchIcon"></i>
-          <input
-            v-model="to"
-            placeholder="Destination"
-            @focus="showToList"
-          />
+          <input v-model="to" placeholder="Destination" @focus="showToList" />
         </div>
       </div>
 
@@ -323,7 +319,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
 
 .input-container {
