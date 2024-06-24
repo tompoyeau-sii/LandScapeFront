@@ -4,6 +4,8 @@
     @selectRoute="showRoute"
     @locationSelected="handleLocationSelected"
   ></overlay>
+  <account></account>
+
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
@@ -16,13 +18,15 @@ import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
-import Overlay from "@/components/Overlay.vue";
+import Overlay from "@/components/OverlayComponent.vue";
+import Account from "@/components/ConnexionComponent.vue";
 import { createMarker, createRouteControl, fitMapToBounds  } from "@/utils/mapUtils";
 
 export default {
   name: "MapView",
   components: {
     Overlay,
+    Account
   },
   data() {
     return {
@@ -113,10 +117,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 #map {
   z-index: 1;
   width: 100%;
   height: 100vh;
+}
+
+html {
+  overflow : hidden; 
 }
 </style>
