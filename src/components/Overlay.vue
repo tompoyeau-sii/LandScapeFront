@@ -1,8 +1,9 @@
 <template>
   <div class="container">
     <search-component
-      @stopRoute="stopRoute"
-      @selectRoute="selectRoute"
+      @stopRoute="$emit('stopRoute')"
+      @selectRoute="$emit('selectRoute', $event)"
+      @locationSelected="$emit('locationSelected', $event)"
     ></search-component>
   </div>
 </template>
@@ -11,14 +12,6 @@
 import SearchComponent from "./SearchComponent.vue";
 export default {
   components: { SearchComponent },
-  methods: {
-    selectRoute(route) {
-      this.$emit("selectRoute", route);
-    },
-    stopRoute() {
-      this.$emit("stopRoute");
-    },
-  },
 };
 </script>
 

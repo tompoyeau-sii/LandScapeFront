@@ -1,16 +1,22 @@
 <template>
   <h3>WecanScape</h3>
   <form>
-    <!-- Départ -->
     <div class="input-container">
+    <!-- Départ -->
       <div>
         <div class="waypoint">
           <div class="input-wrapper">
-            <i
-              class="fas fa-map-marker-alt searchIcon"
-            ></i>
-            <input class="input-waypoint" v-model="from" placeholder="Départ" @focus="showFromList" />
-            <button class="remove-button" @click.prevent="useCurrentLocation('from')">
+            <i class="fas fa-map-marker-alt searchIcon"></i>
+            <input
+              class="input-waypoint"
+              v-model="from"
+              placeholder="Départ"
+              @focus="showFromList"
+            />
+            <button
+              class="remove-button"
+              @click.prevent="useCurrentLocation()"
+            >
               <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
             </button>
           </div>
@@ -33,7 +39,10 @@
               placeholder="Ajouter une étape"
               @input="searchWaypointOptions(index)"
             />
-            <button class="remove-button" @click.prevent="removeWaypoint(index)">
+            <button
+              class="remove-button"
+              @click.prevent="removeWaypoint(index)"
+            >
               <i
                 :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"
               ></i>
@@ -70,41 +79,29 @@
         <i class="fas fa-plus"></i>
         Ajouter une étape
       </button>
+
       <!-- Arrêter la recherche -->
-      <a v-if="from && to" class="stopSearch" @click="stopRoute()">
+      <a v-if="from && to" class="stopSearch" @click="stopRoute">
         Stopper la recherche
       </a>
+      
     </div>
-    <div v-if="showFromOptions">
-      <town
-        :searchOption="from"
-        type="from"
-        @option-selected="handleOptionSelected"
-      />
-    </div>
-    <div v-if="showToOptions">
-      <town
-        :searchOption="to"
-        type="to"
-        @option-selected="handleOptionSelected"
-      />
-    </div>
+    <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
+    <town v-if="showToOptions" :searchOption="to" type="to" @option-selected="handleOptionSelected" />
   </form>
 </template>
 
 <script>
-import axios from "axios";
-import town from "./TownList.vue";
+import mapApiService from '@/services/mapApiService';
+import geolocationService from '@/services/geolocationService';
+import town from './TownList.vue';
 
 export default {
   components: { town },
   data() {
     return {
-      from: "",
-      fromCity: "",
-      fromLatitude: 0,
-      fromLongitude: 0,
-      to: "",
+      from: '',
+      to: '',
       toOptions: [],
       waypoints: [],
       route: [],
@@ -117,13 +114,98 @@ export default {
     };
   },
   methods: {
-    addWaypoint() {
-      this.waypoints.push({ location: "", options: [] });
-    },
-    removeWaypoint(index) {
-      this.waypoints.splice(index, 1);
+    async handleOptionSelected({ option, type }) {
+      if (type === 'from') {
+        this.from = option.display_name;
+        let latitude = parseFloat(option.lat);
+        let longitude = parseFloat(option.lon);
+        this.showFromOptions = false;
+        if (this.to === '') {
+          this.$emit('locationSelected', {
+            lat: latitude,
+            lng: longitude,
+          });
+        }
+      } else if (type === 'to') {
+        this.to = option.display_name;
+        let latitude = parseFloat(option.lat);
+        let longitude = parseFloat(option.lon);
+        this.showToOptions = false;
+        if (this.from === '') {
+          this.$emit('locationSelected', {
+            lat: latitude,
+            lng: longitude,
+          });
+        }
+      }
       this.updateRoute();
     },
+
+    //Met à jour le tracé de l'itinéraire
+    async updateRoute() {
+      try {
+        let fromCoords;
+        // On regarde si on ville à était séléctionner comme point de départ et on récupère ses coordonnées ou sinon on utilise la localisation
+        if (this.from) {
+          fromCoords = await mapApiService.getCoordinates(this.from);
+        } else {
+          const position = await geolocationService.getCurrentPosition();
+          fromCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+        }
+
+        //On récupére les coordonnées de la desination
+        const toCoords = await mapApiService.getCoordinates(this.to);
+        this.route = {
+          coordinates: [
+            [fromCoords.lat, fromCoords.lng],
+            [toCoords.lat, toCoords.lng],
+          ],
+
+          // par défault, la liste d'étape est vide
+          waypoints: [],
+        };
+        // On boucle sur les étapes
+        for (let waypoint of this.waypoints) {
+          // Si on a des étapes
+          if (waypoint.location) {
+            // On récupére les coordonnées
+            const waypointCoords = await mapApiService.getCoordinates(waypoint.location);
+            // On les ajoutent pour le tracer de la route
+            this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
+          }
+        }
+
+        this.$emit('selectRoute', this.route);
+      } catch (error) {
+        console.error('Erreur lors de la récupération de l\'itinéraire :', error);
+      }
+    },
+    //Utilisation de la géolocalisation de l'utilisateur
+    async useCurrentLocation() {
+      try {
+        // On récupère la position actuelle de l'utilisateur avec le service de geolocalisation
+        const position = await geolocationService.getCurrentPosition();
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        // A partir des coordonnées on récupère une adresse
+        const locationData = await mapApiService.getLocationData(lat, lng);
+        this.from = locationData.city;
+        this.updateRoute();
+      } catch (error) {
+        console.error('Erreur de géolocalisation :', error);
+      }
+    },
+
+    //Permet d'ajouter une étape à l'itinéraire
+    addWaypoint() {
+      this.waypoints.push({ location: '', options: [] });
+    },
+
+    // Fait la recherche dans l'api pour récupérer la localisation de la waypoint
     async searchWaypointOptions(index) {
       const waypoint = this.waypoints[index];
       if (waypoint.location.length < 3) {
@@ -131,189 +213,43 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${waypoint.location}`
-        );
-        this.waypoints[index].options = response.data;
+        const options = await mapApiService.searchLocation(waypoint.location);
+        this.$set(this.waypoints, index, { ...waypoint, options });
       } catch (error) {
-        console.error(
-          `Erreur lors de la récupération des suggestions pour l'étape ${
-            index + 1
-          } :`,
-          error
-        );
+        console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
       }
     },
+
+    //Retire une étape de l'itinéraire et met à jour le tracé
+    removeWaypoint(index) {
+      this.waypoints.splice(index, 1);
+      this.updateRoute();
+    },
+
     selectWaypointOption(index, option) {
-      this.waypoints[index].location = option.display_name;
-      this.waypoints[index].options = [];
-      this.updateRoute();
-    },
-    async handleOptionSelected({ option, type }) {
-      if (type === "from") {
-        this.from = option.display_name;
-        this.fromCity = option.display_name;
-        this.fromLatitude = parseFloat(option.lat);
-        this.fromLongitude = parseFloat(option.lon);
-        this.showFromOptions = false;
-      } else if (type === "to") {
-        this.to = option.display_name;
-        this.showToOptions = false;
-      }
-      this.updateRoute();
-    },
-    async updateRoute() {
-      try {
-        let fromCoords;
-        if (this.fromCity) {
-          fromCoords = { lat: this.fromLatitude, lng: this.fromLongitude };
-        } else {
-          const position = await this.getCurrentPosition();
-          fromCoords = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-        }
-
-        const toCoords = await this.getCoordinates(this.to);
-
-        this.route = {
-          coordinates: [
-            [fromCoords.lat, fromCoords.lng],
-            [toCoords.lat, toCoords.lng],
-          ],
-          waypoints: [],
-        };
-
-        for (let waypoint of this.waypoints) {
-          if (waypoint.location) {
-            const waypointCoords = await this.getCoordinates(waypoint.location);
-            this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
-          }
-        }
-
-        console.log("valeur de l'itinéraire", this.route);
-        this.$emit("selectRoute", this.route);
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération de l'itinéraire :",
-          error
-        );
-      }
-    },
-    async getCoordinates(location) {
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${location}`
-        );
-        if (response.data && response.data.length > 0) {
-          const { lat, lon } = response.data[0];
-          return { lat: parseFloat(lat), lng: parseFloat(lon) };
-        } else {
-          throw new Error("Lieu non trouvé");
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des coordonnées :",
-          error
-        );
-        throw error;
-      }
-    },
-    startDrag(event, index) {
-      this.dragging = true;
-      this.dragIndex = index;
-      this.dragStartY = event.clientY;
-      document.addEventListener("mousemove", this.onDrag);
-      document.addEventListener("mouseup", this.endDrag);
-    },
-    onDrag(event) {
-      if (!this.dragging) return;
-
-      const dragOverElement = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      );
-      const newDragOverIndex = [
-        ...dragOverElement.parentElement.children,
-      ].indexOf(dragOverElement);
-
-      console.log(
-        `Dragging over index: ${newDragOverIndex}, Current drag index: ${this.dragIndex}`
-      );
-
-      if (
-        newDragOverIndex !== this.dragOverIndex &&
-        newDragOverIndex >= 0 &&
-        newDragOverIndex < this.waypoints.length
-      ) {
-        this.dragOverIndex = newDragOverIndex;
-        const draggedItem = this.waypoints.splice(this.dragIndex, 1)[0];
-        this.waypoints.splice(this.dragOverIndex, 0, draggedItem);
-        this.dragIndex = this.dragOverIndex;
-      }
-    },
-    endDrag() {
-      this.dragging = false;
-      this.dragIndex = null;
-      this.dragOverIndex = null;
-      document.removeEventListener("mousemove", this.onDrag);
-      document.removeEventListener("mouseup", this.endDrag);
-      this.updateRoute();
-    },
-    async useCurrentLocation(field) {
-      try {
-        const position = await this.getCurrentPosition();
-        const locationData = await this.getLocationData(
-          position.coords.latitude,
-          position.coords.longitude
-        );
-        this[field + "City"] = locationData.city;
-        this[field + "Latitude"] = position.coords.latitude;
-        this[field + "Longitude"] = position.coords.longitude;
-        this[field] = locationData.city;
-        this.updateRoute();
-      } catch (error) {
-        console.error("Erreur de géolocalisation :", error);
-      }
-    },
-    getCurrentPosition() {
-      return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+      this.$set(this.waypoints, index, {
+        location: option.display_name,
+        options: [],
       });
+      this.updateRoute();
     },
-    async getLocationData(lat, lng) {
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
-        );
-        console.log(response.data.address);
-        return {
-          city: response.data.address.road
-            ? `${response.data.address.city}, ${response.data.address.road}`
-            : response.data.address.city,
 
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng),
-        };
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des données de localisation :",
-          error
-        );
-        throw error;
-      }
-    },
+    // Réinitialise les valeurs des variables de création d'une route et emet un signal pour le composant parent
     stopRoute() {
-      this.from = "";
-      this.to = "";
-      (this.waypoints = []), this.$emit("stopRoute");
+      this.from = '';
+      this.to = '';
+      this.waypoints = [];
+      this.$emit('stopRoute');
     },
+    // Affiche la recherche pour le from et cache celle du to
     showFromList() {
       this.showFromOptions = true;
+      this.showToOptions = false;
     },
+    // Affiche la recherche pour le to et cache celle du from
     showToList() {
       this.showToOptions = true;
+      this.showFromOptions = false;
     },
   },
 };
@@ -345,15 +281,14 @@ export default {
 
 .input-waypoint {
   flex: 1;
-  padding-right: 2em; /* Adjust this to make room for the button */
+  padding-right: 2em;
 }
 
 input {
   border: none;
   padding: 5px;
   font-size: large;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
   transition: width 0.3s;
   background-color: transparent;
   outline: none;
@@ -376,9 +311,8 @@ input::placeholder {
 
 .waypoint {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
   justify-content: space-evenly;
+  flex-direction: column;
 }
 
 .dragging {
@@ -401,7 +335,7 @@ input::placeholder {
 
 .remove-button {
   position: absolute;
-  right: 0.5em; /* Adjust this value as needed */
+  right: 0.5em;
   background: none;
   border: none;
   cursor: pointer;

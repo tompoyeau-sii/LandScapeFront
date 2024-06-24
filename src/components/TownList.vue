@@ -13,8 +13,7 @@
 </template>
 
 <script>
-import axios from 'axios';
-
+import mapApiService from '@/services/mapApiService';
 export default {
   props: {
     searchOption: String,
@@ -32,10 +31,8 @@ export default {
         return;
       }
       try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${newVal}`
-        );
-        this.options = response.data;
+        const response = await mapApiService.searchLocation(newVal);
+        this.options = response;
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des suggestions :",

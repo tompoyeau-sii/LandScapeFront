@@ -1,36 +1,23 @@
 <template>
-  <overlay @stopRoute="stopRoute" @selectRoute="showRoute"></overlay>
+  <overlay
+    @stopRoute="stopRoute"
+    @selectRoute="showRoute"
+    @locationSelected="handleLocationSelected"
+  ></overlay>
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
 </template>
 
 <script>
-
-//Import Leaflet
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
-
-// Importer les icônes de Leaflet
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-import startIconUrl from "@/assets/start.png";
-import stepIconUrl from "@/assets/step.png";
-import endIconUrl from "@/assets/end.png";
 import Overlay from "@/components/Overlay.vue";
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+import { createMarker, createRouteControl, fitMapToBounds  } from "@/utils/mapUtils";
 
 export default {
   name: "MapView",
@@ -41,70 +28,82 @@ export default {
     return {
       map: null,
       routeControl: null,
+      point: null,
+      startMarker: null,
+      endMarker: null,
     };
   },
   mounted() {
     this.initializeMap();
   },
   methods: {
+    // Initialise la carte
     initializeMap() {
       this.map = L.map("map", {
         zoomControl: false,
+        // On set la view sur des coordonnées (ici Le mans)
       }).setView([48.0061, 0.1996], 8);
+      // On récupère les tuiles de google maps
       L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
         maxZoom: 20,
         subdomains: ["mt0", "mt1", "mt2", "mt3"],
       }).addTo(this.map);
     },
+
+    //Gestion du zoom de la carte avec en paramètre une latitude et longitude
+    zoomToLocation(lat, lng) {
+      // Zoom initier à 13 mais peut-être modifier pour avoir un plus gros grossissement ou plus petit (20 => zoommer / 1 => dézoomer)
+      this.map.setView([lat, lng], 13);
+    },
+
+    // Méthode permettant de récupérer la 1er input entrée par l'utilisateur pour pouvoir aller faire un zoom sur la carte 
+    handleLocationSelected(location) {
+      this.point = location;
+      // Zoom sur la localisation
+      this.zoomToLocation(location.lat, location.lng);
+      // Création du marker
+      this.startMarker = this.updateMarker(this.startMarker, location, true);
+    },
+
+    //Permet de modifier l'emplacement d'un marker
+    updateMarker(marker, location) {
+      if (marker) this.map.removeLayer(marker);
+      return createMarker(this.map, location);
+    },
+
+    // Création de l'itinéraire
     showRoute(route) {
+      //On enlève les markers déjà présents
+      this.removeMarkers();
+      //On regarde si il n'y pas déjà une route qui existe
       if (this.routeControl) {
+        //Si oui, on la supprime
         this.map.removeControl(this.routeControl);
       }
-
-      let waypoints = [];
-
-      if (route.waypoints) {
-        waypoints = [
-          L.latLng(route.coordinates[0]), // Point de départ
-          ...route.waypoints.map((coord) => L.latLng(coord)), // Étapes intermédiaires
-          L.latLng(route.coordinates[1]), // Point d'arrivée
-        ];
-      } else {
-        waypoints = [
-          L.latLng(route.coordinates[0]), // Point de départ
-          L.latLng(route.coordinates[1]), // Point d'arrivée
-        ];
-      }
-
-      this.routeControl = L.Routing.control({
-        waypoints: waypoints,
-        lineOptions: {
-          styles: [{ color: "blue", opacity: 0.6, weight: 3 }],
-        },
-        createMarker: function (i, waypoint, n) {
-          let iconUrl = markerIcon;
-          if (i === 0) {
-            iconUrl = startIconUrl; // Point de départ
-          } else if (i === n - 1) {
-            iconUrl = endIconUrl; // Point d'arrivée
-          } else {
-            iconUrl = stepIconUrl; // Étapes intermédiaires
-          }
-          return L.marker(waypoint.latLng, {
-            icon: L.icon({
-              iconUrl: iconUrl,
-              iconRetinaUrl: iconUrl,
-              iconSize: [41, 41],
-              popupAnchor: [1, -34],
-            }),
-          });
-        },
-        router: L.Routing.osrmv1({
-          language: "fr",
-          serviceUrl: "https://router.project-osrm.org/route/v1",
-        }),
-      }).addTo(this.map);
+      
+      // On créer la route via la méthode du fichier mapUtils.js
+      this.routeControl = createRouteControl(this.map, route);
+      //On gére le zoom pour que le points de départ et d'arrivé soit visible par l'utilisateur
+      fitMapToBounds(this.map, route.coordinates[0], route.coordinates[1]);
     },
+
+    // Permet de retirer les markers
+    removeMarkers() {
+      if (this.startMarker) {
+        // On retire le marker de départ de la carte
+        this.map.removeLayer(this.startMarker);
+        // On réinitialise la valeur du marker à null
+        this.startMarker = null;
+      }
+      if (this.endMarker) {
+        // On retire le marker d'arrivé de la carte
+        this.map.removeLayer(this.endMarker);
+        // On réinitialise la valeur du marker à null
+        this.endMarker = null;
+      }
+    },
+
+    // Stop l'itinaire 
     stopRoute() {
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
