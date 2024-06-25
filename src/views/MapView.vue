@@ -124,6 +124,15 @@ export default {
   height: 100vh;
 }
 
+/* Déplace l'élément en bas à gauche */
+.leaflet-bar {
+    position: fixed;
+    bottom: 0;  /* Place l'élément en bas de l'écran */
+    left: 0;    /* Place l'élément à gauche de l'écran */
+    margin: 10px; /* Ajoute une marge pour l'espacement */
+}
+
+
 html {
   overflow : hidden; 
 }

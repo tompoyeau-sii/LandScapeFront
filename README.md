@@ -1,4 +1,4 @@
-# gps-app
+# WekanScape
 
 ## Project setup
 ```

@@ -1,5 +1,4 @@
 <template>
-  <h3>WecanScape</h3>
   <form>
     <div class="input-container">
     <!-- Départ -->
@@ -350,12 +349,5 @@ input::placeholder {
 
 .remove-button:hover {
   background-color: #f0f0f0;
-}
-
-h3 {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  margin-bottom: 0px;
 }
 </style>

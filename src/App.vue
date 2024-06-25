@@ -1,17 +1,13 @@
 <template>
   <div id="app">
-    <MapView />
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import MapView from "./views/MapView.vue";
 
 export default {
   name: "App",
-  components: {
-    MapView,
-  },
 };
 </script>
 
@@ -22,6 +18,7 @@ html,
 body,
 #app {
   height: 100%;
+  overflow: auto;
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }

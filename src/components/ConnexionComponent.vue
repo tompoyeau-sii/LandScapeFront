@@ -8,40 +8,35 @@
 
     <template v-slot:default="{ isActive }">
       <v-card class="mx-auto pa-12 pb-3" elevation="8" width="480" rounded="lg">
-        <h2 class="pb-4 text-center">WecanScape | Connexion</h2>
-        <div class="text-subtitle-1 text-medium-emphasis">Adresse mail</div>
+        <h2 class="pb-4 text-center">On se connait ?</h2>
 
         <v-text-field
-          density="compact"
           placeholder="Adresse mail"
           prepend-inner-icon="mdi-email-outline"
-          variant="outlined"
+          variant="solo-filled"
         ></v-text-field>
-
-        <div
-          class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
-        >
-          Mot de passe
-
-          <a
-            class="text-caption text-decoration-none text-blue"
-            href="#"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Mot de passse oublié ?
-          </a>
-        </div>
 
         <v-text-field
           :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
           :type="visible ? 'text' : 'password'"
-          density="compact"
           placeholder="Mot de passe"
           prepend-inner-icon="mdi-lock-outline"
-          variant="outlined"
+          variant="solo-filled"
           @click:append-inner="visible = !visible"
         ></v-text-field>
+
+        <!-- <div
+            class="text-subtitle-1 mb-5 text-medium-emphasis d-flex align-center justify-end"
+          >  
+            <a
+              class="text-caption text-decoration-none text-blue"
+              href="#"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Mot de passse oublié ?
+            </a>
+          </div> -->
 
         <v-btn
           class="mb-2"
@@ -53,16 +48,14 @@
         >
           Me connecter
         </v-btn>
-
         <v-card-text class="text-center">
-          <a
+          <RouterLink
             class="text-blue text-decoration-none"
-            href="#"
-            rel="noopener noreferrer"
-            target="_blank"
+            to="/creer-mon-compte"
           >
-            Créez votre compte ici <v-icon icon="mdi-chevron-right"></v-icon>
-          </a>
+            Créez votre compte ici
+            <v-icon icon="mdi-chevron-right"></v-icon>
+          </RouterLink>
         </v-card-text>
       </v-card>
     </template>
