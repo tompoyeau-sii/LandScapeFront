@@ -8,7 +8,7 @@ const routes = [
         component: () => import('../views/MapView.vue'),
     },
     {
-        path: '/creer-mon-compte',
+        path: '/inscription',
         name: 'CreateAccountView',
         component: () => import('../views/CreateAccountView.vue'),
     }

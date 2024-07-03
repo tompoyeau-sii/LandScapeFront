@@ -78,8 +78,11 @@
   </div>
 </template>
 
-
 <script>
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+
 export default {
   data() {
     return {
@@ -101,10 +104,28 @@ export default {
     };
   },
   methods: {
-    submit() {
+    async submit() {
       if (this.$refs.form.validate()) {
-        // Handle form submission, e.g., send data to the server
-        console.log("Form data:", this.user);
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, this.user.email, this.user.password);
+          const user = userCredential.user;
+          
+          // Vérifiez les valeurs de db et user.uid
+          console.log("db:", db);
+          console.log("user.uid:", user.uid);
+
+          await setDoc(doc(db, "users", user.uid), {
+            firstName: this.user.firstName,
+            lastName: this.user.lastName,
+            birthDate: this.user.birthDate,
+            email: this.user.email,
+          });
+
+          // Redirection ou autre logique après inscription réussie
+          console.log("Utilisateur inscrit et connecté:", this.user);
+        } catch (err) {
+          console.error("Erreur d'inscription:", err);
+        }
       }
     },
     retourPagePrecedente() {
@@ -113,6 +134,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 html {
   overflow-y: hidden;

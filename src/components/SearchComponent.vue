@@ -1,10 +1,19 @@
 <template>
   <form>
     <div class="input-container">
-    <!-- Départ -->
+      <!-- Départ -->
       <div>
         <div class="waypoint">
           <div class="input-wrapper">
+            <!-- <v-text-field
+            placeholder="Départ"
+            v-model="from"
+            prepend-inner-icon="mdi-map-marker"
+            variant="solo-filled"
+             @focus="showFromList"
+            append-inner-icon="mdi-crosshairs-gps"
+          @click:append-inner="useCurrentLocation()"
+        ></v-text-field> -->
             <i class="fas fa-map-marker-alt searchIcon"></i>
             <input
               class="input-waypoint"
@@ -12,10 +21,7 @@
               placeholder="Départ"
               @focus="showFromList"
             />
-            <button
-              class="remove-button"
-              @click.prevent="useCurrentLocation()"
-            >
+            <button class="remove-button" @click.prevent="useCurrentLocation()">
               <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
             </button>
           </div>
@@ -27,7 +33,6 @@
         v-for="(waypoint, index) in waypoints"
         :key="index"
         :class="{ dragging: dragIndex === index }"
-        @mousedown="startDrag($event, index)"
       >
         <div class="waypoint">
           <div class="input-wrapper">
@@ -60,6 +65,18 @@
         </div>
       </div>
 
+      
+      <v-btn
+        v-if="from && to"
+        @click="addWaypoint"
+        color="blue"
+        variant="tonal"
+        prepend-icon="mdi-plus"
+        class="ma-3 text-none"
+      >
+        Ajouter une étape
+      </v-btn>
+
       <!-- Destination -->
       <div>
         <div class="input-wrapper">
@@ -69,7 +86,9 @@
       </div>
 
       <!-- Ajouter une Étapes -->
-      <button
+
+
+      <!-- <button
         v-if="from && to"
         class="add-waypoint"
         type="button"
@@ -77,30 +96,37 @@
       >
         <i class="fas fa-plus"></i>
         Ajouter une étape
-      </button>
+      </button> -->
 
       <!-- Arrêter la recherche -->
-      <a v-if="from && to" class="stopSearch" @click="stopRoute">
-        Stopper la recherche
-      </a>
-      
+      <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
     </div>
-    <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
-    <town v-if="showToOptions" :searchOption="to" type="to" @option-selected="handleOptionSelected" />
+    <town
+      v-if="showFromOptions"
+      :searchOption="from"
+      type="from"
+      @option-selected="handleOptionSelected"
+    />
+    <town
+      v-if="showToOptions"
+      :searchOption="to"
+      type="to"
+      @option-selected="handleOptionSelected"
+    />
   </form>
 </template>
 
 <script>
-import mapApiService from '@/services/mapApiService';
-import geolocationService from '@/services/geolocationService';
-import town from './TownList.vue';
+import mapApiService from "@/services/mapApiService";
+import geolocationService from "@/services/geolocationService";
+import town from "./TownList.vue";
 
 export default {
   components: { town },
   data() {
     return {
-      from: '',
-      to: '',
+      from: "",
+      to: "",
       toOptions: [],
       waypoints: [],
       route: [],
@@ -114,24 +140,24 @@ export default {
   },
   methods: {
     async handleOptionSelected({ option, type }) {
-      if (type === 'from') {
+      if (type === "from") {
         this.from = option.display_name;
         let latitude = parseFloat(option.lat);
         let longitude = parseFloat(option.lon);
         this.showFromOptions = false;
-        if (this.to === '') {
-          this.$emit('locationSelected', {
+        if (this.to === "") {
+          this.$emit("locationSelected", {
             lat: latitude,
             lng: longitude,
           });
         }
-      } else if (type === 'to') {
+      } else if (type === "to") {
         this.to = option.display_name;
         let latitude = parseFloat(option.lat);
         let longitude = parseFloat(option.lon);
         this.showToOptions = false;
-        if (this.from === '') {
-          this.$emit('locationSelected', {
+        if (this.from === "") {
+          this.$emit("locationSelected", {
             lat: latitude,
             lng: longitude,
           });
@@ -171,17 +197,23 @@ export default {
           // Si on a des étapes
           if (waypoint.location) {
             // On récupére les coordonnées
-            const waypointCoords = await mapApiService.getCoordinates(waypoint.location);
+            const waypointCoords = await mapApiService.getCoordinates(
+              waypoint.location
+            );
             // On les ajoutent pour le tracer de la route
             this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
           }
         }
 
-        this.$emit('selectRoute', this.route);
+        this.$emit("selectRoute", this.route);
       } catch (error) {
-        console.error('Erreur lors de la récupération de l\'itinéraire :', error);
+        console.error(
+          "Erreur lors de la récupération de l'itinéraire :",
+          error
+        );
       }
     },
+    
     //Utilisation de la géolocalisation de l'utilisateur
     async useCurrentLocation() {
       try {
@@ -195,13 +227,15 @@ export default {
         this.from = locationData.city;
         this.updateRoute();
       } catch (error) {
-        console.error('Erreur de géolocalisation :', error);
+        if(error.code == 1) {
+          console.error("Erreur de géolocalisation :", error);
+        }
       }
     },
 
     //Permet d'ajouter une étape à l'itinéraire
     addWaypoint() {
-      this.waypoints.push({ location: '', options: [] });
+      this.waypoints.push({ location: "", options: [] });
     },
 
     // Fait la recherche dans l'api pour récupérer la localisation de la waypoint
@@ -213,9 +247,16 @@ export default {
       }
       try {
         const options = await mapApiService.searchLocation(waypoint.location);
-        this.$set(this.waypoints, index, { ...waypoint, options });
+        console.log(options);
+        // Met à jour directement l'objet dans l'array réactif
+        this.waypoints[index] = { ...waypoint, options };
       } catch (error) {
-        console.error(`Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`, error);
+        console.error(
+          `Erreur lors de la récupération des suggestions pour l'étape ${
+            index + 1
+          } :`,
+          error
+        );
       }
     },
 
@@ -226,19 +267,20 @@ export default {
     },
 
     selectWaypointOption(index, option) {
-      this.$set(this.waypoints, index, {
+      // Met à jour directement l'objet dans l'array réactif
+      this.waypoints[index] = {
         location: option.display_name,
         options: [],
-      });
+      };
       this.updateRoute();
     },
 
     // Réinitialise les valeurs des variables de création d'une route et emet un signal pour le composant parent
     stopRoute() {
-      this.from = '';
-      this.to = '';
+      this.from = "";
+      this.to = "";
       this.waypoints = [];
-      this.$emit('stopRoute');
+      this.$emit("stopRoute");
     },
     // Affiche la recherche pour le from et cache celle du to
     showFromList() {
@@ -249,6 +291,47 @@ export default {
     showToList() {
       this.showToOptions = true;
       this.showFromOptions = false;
+    },
+    startDrag(event, index) {
+      this.dragging = true;
+      this.dragIndex = index;
+      this.dragStartY = event.clientY;
+      document.addEventListener("mousemove", this.onDrag);
+      document.addEventListener("mouseup", this.endDrag);
+    },
+    onDrag(event) {
+      if (!this.dragging) return;
+
+      const dragOverElement = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+      const newDragOverIndex = [
+        ...dragOverElement.parentElement.children,
+      ].indexOf(dragOverElement);
+
+      console.log(
+        `Dragging over index: ${newDragOverIndex}, Current drag index: ${this.dragIndex}`
+      );
+
+      if (
+        newDragOverIndex !== this.dragOverIndex &&
+        newDragOverIndex >= 0 &&
+        newDragOverIndex < this.waypoints.length
+      ) {
+        this.dragOverIndex = newDragOverIndex;
+        const draggedItem = this.waypoints.splice(this.dragIndex, 1)[0];
+        this.waypoints.splice(this.dragOverIndex, 0, draggedItem);
+        this.dragIndex = this.dragOverIndex;
+      }
+    },
+    endDrag() {
+      this.dragging = false;
+      this.dragIndex = null;
+      this.dragOverIndex = null;
+      document.removeEventListener("mousemove", this.onDrag);
+      document.removeEventListener("mouseup", this.endDrag);
+      this.updateRoute();
     },
   },
 };
@@ -287,7 +370,8 @@ input {
   border: none;
   padding: 5px;
   font-size: large;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
   transition: width 0.3s;
   background-color: transparent;
   outline: none;

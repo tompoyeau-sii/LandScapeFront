@@ -6,6 +6,10 @@
       @selectRoute="$emit('selectRoute', $event)"
       @locationSelected="$emit('locationSelected', $event)"
     ></search-component>
+    <div class="route-info pb-5" v-if="distance != 0 && time != 0">
+      <strong>{{ distance }} km</strong>
+      <strong>{{ formattedTime }}</strong>
+    </div>
   </div>
 </template>
 
@@ -13,6 +17,33 @@
 import SearchComponent from "./SearchComponent.vue";
 export default {
   components: { SearchComponent },
+  props: {
+    distance: {
+      type: String,
+      default: "0",
+    },
+    time: {
+      type: String,
+      default: "0",
+    },
+  },
+  data() {
+    return {
+      routeDistance: 0, // Variable pour stocker la distance
+      routeTime: 0, // Variable pour stocker le temps
+    };
+  },
+  computed: {
+    formattedTime() {
+      const timeInMinutes = parseFloat(this.time);
+      if (timeInMinutes >= 60) {
+        const hours = Math.floor(timeInMinutes / 60);
+        const minutes = timeInMinutes % 60;
+        return `${hours} h ${minutes.toFixed(0)} minutes`;
+      }
+      return `${timeInMinutes.toFixed(2)} minutes`;
+    },
+  },
 };
 </script>
 
@@ -21,6 +52,13 @@ h3 {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
+}
+
+/* Style pour afficher les informations de kilométrage et de temps */
+.route-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .container {

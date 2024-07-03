@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import router from './router/router'
+import store from './store';
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
@@ -14,4 +15,4 @@ const vuetify = createVuetify({
     directives,
 })
 
-createApp(App).use(router).use(vuetify).mount('#app');
+createApp(App).use(store).use(router).use(vuetify).mount('#app');
