@@ -47,7 +47,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 h3 {
   display: flex;
   flex-wrap: nowrap;
@@ -66,11 +66,8 @@ h3 {
     0 2px 6px 2px rgba(60, 64, 67, 0.15);
   display: flex;
   flex-direction: column;
-  position: absolute;
-  margin: 1%;
   border-radius: 15px;
   background-color: white;
-  z-index: 2;
   align-items: stretch;
   width: 17%;
 }

@@ -64,9 +64,13 @@
               ></v-text-field>
             </v-col>
           </v-row>
-          <v-btn class="mt-5" :disabled="!valid" color="blue" @click="submit">
-            En route !
-          </v-btn>
+          <v-btn
+            class="mt-5 register-button"
+            :disabled="!valid"
+            color="blue"
+            @click="submit"
+            >En route !</v-btn
+          >
         </v-form>
         <img
           class="img-form"
@@ -80,8 +84,8 @@
 
 <script>
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 
 export default {
   data() {
@@ -107,18 +111,24 @@ export default {
     async submit() {
       if (this.$refs.form.validate()) {
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, this.user.email, this.user.password);
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            this.user.email,
+            this.user.password
+          );
           const user = userCredential.user;
-          
+
           // Vérifiez les valeurs de db et user.uid
           console.log("db:", db);
           console.log("user.uid:", user.uid);
 
+          // Utiliser user.uid comme identifiant de document
           await setDoc(doc(db, "users", user.uid), {
             firstName: this.user.firstName,
             lastName: this.user.lastName,
             birthDate: this.user.birthDate,
             email: this.user.email,
+            createdAt: new Date(),
           });
 
           // Redirection ou autre logique après inscription réussie
@@ -185,6 +195,11 @@ html {
 
 .img-form {
   width: 50%;
+}
+
+.register-button {
+  color: white;
+  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
 }
 
 .mb-5 {

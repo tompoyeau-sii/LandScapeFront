@@ -9,8 +9,13 @@ const routes = [
     },
     {
         path: '/inscription',
-        name: 'CreateAccountView',
-        component: () => import('../views/CreateAccountView.vue'),
+        name: 'RegisterView',
+        component: () => import('../views/RegisterView.vue'),
+    },
+    {
+        path: '/profil',
+        name: 'AccountView',
+        component: () => import('../views/AccountView.vue'),
     }
 
 ];

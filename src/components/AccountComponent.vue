@@ -1,23 +1,47 @@
 <template>
-  <div>
-    <h2>Bienvenue, {{ user.displayName || user.email }}</h2>
-    <v-btn @click="logout">Se déconnecter</v-btn>
-  </div>
+    <v-menu>
+      <template v-slot:activator="{ props }">
+        <v-btn prepend-icon="mdi-account" v-bind="props" class="account-button">
+          Karine LeFort
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item @click="goToProfile">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-account"></v-icon>
+          </template>
+          <v-list-item-title>Profil</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="handleLogout">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-logout"></v-icon>
+          </template>
+          <v-list-item-title>Déconnexion</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions } from "vuex";
 
 export default {
-  computed: {
-    ...mapState(['user']),
-  },
   methods: {
-    ...mapActions(['logout']),
+    ...mapActions(["logout"]),
+    goToProfile() {
+      this.$router.push({ name: "AccountView" });
+    },
+    async handleLogout() {
+      await this.logout();
+    },
   },
 };
 </script>
 
-<style>
-/* Ajoutez votre style ici */
+<style scoped>
+.account-button {
+  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
+  color: white;
+}
 </style>

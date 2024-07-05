@@ -1,18 +1,14 @@
 <template>
-  <overlay
-    @stopRoute="stopRoute"
-    @selectRoute="showRoute"
-    @locationSelected="handleLocationSelected"
-    :distance="routeDistance"
-    :time="routeTime"
-  ></overlay>
-  <div v-if="!user">
-    <Connexion></Connexion>
+  <div class="header">
+    <overlay
+      @stopRoute="stopRoute"
+      @selectRoute="showRoute"
+      @locationSelected="handleLocationSelected"
+      :distance="routeDistance"
+      :time="routeTime"
+    ></overlay>
+    <connexion-panel></connexion-panel>
   </div>
-  <div v-else>
-    <Account></Account>
-  </div>
-  
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
@@ -26,21 +22,19 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import Overlay from "@/components/OverlayComponent.vue";
-import Connexion from "@/components/ConnexionComponent.vue";
-import Account from "@/components/AccountComponent.vue"; // Importez le composant Account
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 import {
   createMarker,
   createRouteControl,
   fitMapToBounds,
 } from "@/utils/mapUtils";
+import ConnexionPanel from '@/components/ConnexionPanel.vue';
 
 export default {
   name: "MapView",
   components: {
     Overlay,
-    Connexion,
-    Account,  // Déclarez le composant Account
+    ConnexionPanel,
   },
   data() {
     return {
@@ -51,10 +45,15 @@ export default {
       endMarker: null,
       routeDistance: "0",
       routeTime: "0",
+      notifications: [
+        { title: "Notification 1", body: "This is notification 1" },
+        { title: "Notification 2", body: "This is notification 2" },
+        { title: "Notification 3", body: "This is notification 3" },
+      ],
     };
   },
   computed: {
-    ...mapState(['user']),  // Ajoutez l'état de l'utilisateur depuis Vuex
+    ...mapState(["user"]), // Ajoutez l'état de l'utilisateur depuis Vuex
   },
   mounted() {
     this.initializeMap();
@@ -93,7 +92,6 @@ export default {
       if (marker) this.map.removeLayer(marker);
       return createMarker(this.map, location);
     },
-
     // Création de l'itinéraire
     showRoute(route) {
       //On enlève les markers déjà présents
@@ -156,6 +154,14 @@ export default {
 </script>
 
 <style>
+.header {
+  z-index: 2;
+    position: fixed;
+  display: flex;
+  width: 100%;
+  padding: 1%;
+  justify-content: space-between;
+}
 #map {
   z-index: 1;
   width: 100%;

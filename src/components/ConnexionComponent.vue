@@ -1,103 +1,115 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500">
-    <template v-slot:activator="{ props: activatorProps }">
-      <v-btn icon="fa-user" v-bind="activatorProps" class="account-button">
-        <i :class="{ fas: true, 'fa-user': true }"></i>
-      </v-btn>
-    </template>
+  <div>
+    <v-btn @click="dialog = true" class="account-btn text-none">
+      Se connecter
+    </v-btn>
 
-    <v-card class="mx-auto pa-12 pb-3" elevation="8" width="480" rounded="lg">
-      <h2 class="pb-4 text-center">On se connait ?</h2>
-      <form @submit.prevent="login">
-        <v-text-field
-          v-model="email"
-          placeholder="Adresse mail"
-          prepend-inner-icon="mdi-email-outline"
-          variant="solo-filled"
-        ></v-text-field>
+    <v-dialog v-model="dialog" max-width="500">
+      <v-card class="mx-auto pa-12 pb-3" elevation="8" width="480" rounded="lg">
+        <h2 class="pb-4 text-center">On se connait ?</h2>
+        <v-form ref="form" v-model="valid" @submit.prevent="handleLogin">
+          <v-text-field
+            v-model="email"
+            placeholder="Adresse mail"
+            prepend-inner-icon="mdi-email-outline"
+            variant="solo-filled"
+            :rules="[rules.required, rules.email]"
+          ></v-text-field>
 
-        <v-text-field
-          :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-          :type="visible ? 'text' : 'password'"
-          v-model="password"
-          placeholder="Mot de passe"
-          prepend-inner-icon="mdi-lock-outline"
-          variant="solo-filled"
-          @click:append-inner="visible = !visible"
-        ></v-text-field>
+          <v-text-field
+            :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+            :type="visible ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Mot de passe"
+            prepend-inner-icon="mdi-lock-outline"
+            variant="solo-filled"
+            @click:append-inner="visible = !visible"
+            :rules="[rules.required]"
+          ></v-text-field>
 
-        <v-btn
-          class="mb-2"
-          color="blue"
-          size="large"
-          variant="tonal"
-          type="submit"
-          block
-        >
-          Me connecter
-        </v-btn>
-      </form>
-      <v-btn
-        class="mb-2"
-        color="blue"
-        size="large"
-        variant="tonal"
-        prepend-icon="mdi-google"
-        @click="loginWithGoogle"
-        type="submit"
-        block
-      >
-        Connexion avec Google
-      </v-btn>
-      <v-card-text class="text-center">
-        <RouterLink class="text-blue text-decoration-none" to="/inscription">
-          Créez votre compte ici
-          <v-icon icon="mdi-chevron-right"></v-icon>
-        </RouterLink>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+          <v-alert v-if="globalError" type="error" class="mt-4 mb-4">
+            {{ globalError }}
+          </v-alert>
+
+          <v-btn class="connexion-button mb-2" size="large" type="submit" block>
+            Me connecter
+          </v-btn>
+        </v-form>
+        <v-card-text class="text-center">
+          <RouterLink class="text-blue text-decoration-none" to="/inscription">
+            Créez votre compte ici
+            <v-icon icon="mdi-chevron-right"></v-icon>
+          </RouterLink>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from "vuex";
 
 export default {
   data: () => ({
+    valid: false,
     visible: false,
     dialog: false,
     email: "",
     password: "",
-    error: "",
+    emailError: "",
+    passwordError: "",
+    globalError: "",
+    rules: {
+      required: (value) => !!value || "Ce champ est requis.",
+      email: (value) => {
+        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return pattern.test(value) || "E-mail invalide.";
+      },
+    },
   }),
-  methods: {
-    ...mapActions(['login', 'loginWithGoogle']),
-    async login() {
-      try {
-        await this.login({ email: this.email, password: this.password });
-        this.dialog = false;
-      } catch (err) {
-        console.error(err);
-        this.error = err.message;
+  computed: {
+    ...mapState(["authError"]),
+  },
+  watch: {
+    authError(newVal) {
+      if (newVal) {
+        this.globalError = newVal;
       }
     },
-    async loginWithGoogle() {
-      try {
-        await this.loginWithGoogle();
-        this.dialog = false;
-      } catch (err) {
-        this.error = err.message;
+  },
+  methods: {
+    ...mapActions(["login"]),
+    async handleLogin() {
+      if (this.valid) {
+        this.clearErrors();
+
+        try {
+          await this.login({ email: this.email, password: this.password });
+          if (!this.authError) {
+            this.dialog = false;
+          }
+        } catch (error) {
+          this.globalError = "Une erreur s'est produite. Veuillez réessayer.";
+        }
       }
+    },
+    clearErrors() {
+      this.emailError = "";
+      this.passwordError = "";
+      this.globalError = "";
     },
   },
 };
 </script>
 
-<style>
-.account-button {
-  right: 0px;
-  position: absolute;
-  margin: 1%;
-  z-index: 2;
+<style scoped>
+.account-btn {
+  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
+  color: white;
+}
+
+.connexion-button {
+  color: white;
+  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
 }
 </style>
