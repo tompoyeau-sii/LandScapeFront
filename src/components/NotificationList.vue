@@ -3,6 +3,7 @@
     v-model="menu"
     :close-on-content-click="false"
     location="bottom"
+    width="600px"
   >
     <template v-slot:activator="{ props }">
       <v-btn class="notification-button" v-bind="props">

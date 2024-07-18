@@ -7,7 +7,7 @@
       :distance="routeDistance"
       :time="routeTime"
     ></overlay>
-    <connexion-panel></connexion-panel>
+    <panel></panel>
   </div>
   <div>
     <div id="map" style="height: 100vh"></div>
@@ -28,13 +28,13 @@ import {
   createRouteControl,
   fitMapToBounds,
 } from "@/utils/mapUtils";
-import ConnexionPanel from '@/components/ConnexionPanel.vue';
+import Panel from '@/components/PanelComponent.vue';
 
 export default {
   name: "MapView",
   components: {
     Overlay,
-    ConnexionPanel,
+    Panel,
   },
   data() {
     return {
@@ -66,9 +66,9 @@ export default {
         // On set la view sur des coordonnées (ici Le mans)
       }).setView([48.0061, 0.1996], 8);
       // On récupère les tuiles de google maps
-      L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 20,
-        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        // subdomains: ["mt0", "mt1", "mt2", "mt3"],
       }).addTo(this.map);
     },
 
@@ -154,14 +154,14 @@ export default {
 </script>
 
 <style>
-.header {
+/* .header {
   z-index: 2;
     position: fixed;
   display: flex;
   width: 100%;
   padding: 1%;
   justify-content: space-between;
-}
+} */
 #map {
   z-index: 1;
   width: 100%;

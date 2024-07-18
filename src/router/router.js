@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router'
-
+import { getAuth } from 'firebase/auth'; // Importation de l'authentification Firebase
 
 const routes = [
     {
@@ -16,6 +16,7 @@ const routes = [
         path: '/profil',
         name: 'AccountView',
         component: () => import('../views/AccountView.vue'),
+        meta: { requiresAuth: true } // Ajout d'un meta field pour indiquer que l'authentification est requise
     }
 
 ];
@@ -28,4 +29,16 @@ const router = createRouter({
         return { top: 0 }
     }
 })
+
+router.beforeEach((to, from, next) => {
+    const auth = getAuth(); // Obtenir l'instance d'authentification
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+    if (requiresAuth && !auth.currentUser) {
+        // Si la route nécessite une authentification et que l'utilisateur n'est pas connecté
+        next('/'); // Redirige vers la page d'inscription ou de connexion
+    } else {
+        next(); // Sinon, permet la navigation
+    }
+});
 export default router;

@@ -14,6 +14,8 @@
 
 <script>
 import mapApiService from '@/services/mapApiService';
+import { debounce } from 'lodash';
+
 export default {
   props: {
     searchOption: String,
@@ -22,10 +24,19 @@ export default {
   data() {
     return {
       options: [],
+      debouncedSearch: null, // add debouncedSearch to the data
     };
   },
   watch: {
-    async searchOption(newVal) {
+    searchOption(newVal) {
+      this.debouncedSearch(newVal);
+    },
+  },
+  created() {
+    this.debouncedSearch = debounce(this.searchLocation, 500);
+  },
+  methods: {
+    async searchLocation(newVal) {
       if (newVal.length < 3) {
         this.options = [];
         return;
@@ -40,8 +51,6 @@ export default {
         );
       }
     },
-  },
-  methods: {
     selectOption(option) {
       this.$emit('option-selected', { option, type: this.type });
     },
@@ -71,7 +80,6 @@ export default {
   font-weight: bold;
   font-size: small;
   border-radius: 10px;
-  
 }
 
 .list-element:hover {

@@ -1,7 +1,7 @@
 <template>
   <div class="body">
     <v-card class="mx-auto pa-12" elevation="8" max-width="1000" rounded="lg">
-      <div class="header">
+      <div class="head">
         <v-btn
           variant="text"
           @click="retourPagePrecedente"
@@ -84,8 +84,8 @@
 
 <script>
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { auth } from "../plugins/firebaseConfig";
+import apiService from "@/services/apiService";
 
 export default {
   data() {
@@ -118,18 +118,24 @@ export default {
           );
           const user = userCredential.user;
 
-          // Vérifiez les valeurs de db et user.uid
-          console.log("db:", db);
-          console.log("user.uid:", user.uid);
+          this.user.lastName =
+            this.user.lastName.charAt(0).toUpperCase() +
+            this.user.lastName.slice(1).toLowerCase();
+            
+          this.user.firstName =
+            this.user.firstName.charAt(0).toUpperCase() +
+            this.user.firstName.slice(1).toLowerCase();
 
-          // Utiliser user.uid comme identifiant de document
-          await setDoc(doc(db, "users", user.uid), {
+          // Envoyer les données utilisateur à l'API Java Spring Boot
+          const userData = {
+            name: this.user.lastName,
             firstName: this.user.firstName,
-            lastName: this.user.lastName,
-            birthDate: this.user.birthDate,
-            email: this.user.email,
-            createdAt: new Date(),
-          });
+            birthdate: this.user.birthDate,
+            uId: user.uid,
+            right: { id: 1 }, // Assuming `right` with id 1 is the default right
+          };
+
+          await apiService.post("/users", userData);
 
           // Redirection ou autre logique après inscription réussie
           console.log("Utilisateur inscrit et connecté:", this.user);
@@ -170,14 +176,14 @@ html {
   align-items: center;
 }
 
-.header {
+.head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 }
 
-.header .title {
+.head .title {
   flex: 1;
   text-align: center;
 }

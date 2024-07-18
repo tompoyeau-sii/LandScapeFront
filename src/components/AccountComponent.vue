@@ -1,8 +1,8 @@
 <template>
     <v-menu>
       <template v-slot:activator="{ props }">
-        <v-btn prepend-icon="mdi-account" v-bind="props" class="account-button">
-          Karine LeFort
+        <v-btn prepend-icon="mdi-account" v-bind="props" class="account-button text-capitalize">
+          {{ currentUser.firstName }} {{ currentUser.name }}
         </v-btn>
       </template>
 
@@ -23,18 +23,24 @@
     </v-menu>
 </template>
 
+
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   methods: {
-    ...mapActions(["logout"]),
+    ...mapActions(['logout']),
     goToProfile() {
-      this.$router.push({ name: "AccountView" });
+      this.$router.push({ name: 'AccountView' });
     },
     async handleLogout() {
       await this.logout();
     },
+  },
+  computed: {
+    ...mapGetters({
+      currentUser: 'getUser'
+    }),
   },
 };
 </script>
