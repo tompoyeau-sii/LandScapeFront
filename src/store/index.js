@@ -63,7 +63,7 @@ export default createStore({
                     commit('clearUser');
                 }
             });
-        }
+        },
     },
     getters: {
         getUser(state) {
@@ -72,5 +72,6 @@ export default createStore({
         getUserHobbies(state) {
             return state.userHobbies;
         },
+       
     },
 });
