@@ -1,37 +1,40 @@
 <template>
-    <v-menu>
-      <template v-slot:activator="{ props }">
-        <v-btn prepend-icon="mdi-account" v-bind="props" class="account-button text-capitalize">
-          {{ currentUser.firstName }} {{ currentUser.name }}
-        </v-btn>
-      </template>
+  <v-menu>
+    <template v-slot:activator="{ props }">
+      <v-btn
+        prepend-icon="mdi-account"
+        v-bind="props"
+        class="account-button text-capitalize"
+      >
+        {{ currentUser.firstName }} {{ currentUser.name }}
+      </v-btn>
+    </template>
 
-      <v-list>
-        <v-list-item @click="goToProfile">
-          <template v-slot:prepend>
-            <v-icon icon="mdi-account"></v-icon>
-          </template>
-          <v-list-item-title>Profil</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="handleLogout">
-          <template v-slot:prepend>
-            <v-icon icon="mdi-logout"></v-icon>
-          </template>
-          <v-list-item-title>Déconnexion</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+    <v-list>
+      <v-list-item @click="goToProfile">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-account"></v-icon>
+        </template>
+        <v-list-item-title>Profil</v-list-item-title>
+      </v-list-item>
+      <v-list-item @click="handleLogout">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-logout"></v-icon>
+        </template>
+        <v-list-item-title>Déconnexion</v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-menu>
 </template>
 
-
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   methods: {
-    ...mapActions(['logout']),
+    ...mapActions(["logout"]),
     goToProfile() {
-      this.$router.push({ name: 'AccountView' });
+      this.$router.push({ name: "AccountView" });
     },
     async handleLogout() {
       await this.logout();
@@ -39,7 +42,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      currentUser: 'getUser'
+      currentUser: "getUser",
     }),
   },
 };

@@ -45,11 +45,6 @@ export default {
       endMarker: null,
       routeDistance: "0",
       routeTime: "0",
-      notifications: [
-        { title: "Notification 1", body: "This is notification 1" },
-        { title: "Notification 2", body: "This is notification 2" },
-        { title: "Notification 3", body: "This is notification 3" },
-      ],
     };
   },
   computed: {
@@ -154,14 +149,6 @@ export default {
 </script>
 
 <style>
-/* .header {
-  z-index: 2;
-    position: fixed;
-  display: flex;
-  width: 100%;
-  padding: 1%;
-  justify-content: space-between;
-} */
 #map {
   z-index: 1;
   width: 100%;

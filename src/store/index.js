@@ -35,7 +35,7 @@ export default createStore({
                 const firebaseUser = userCredential.user;
                 const userData = await apiService.get(`/users/${firebaseUser.uid}`);
                 const userHobbies = await apiService.get(`/users/${userData.id}/hobbies`);
-
+                console.log(userData)
                 commit('setUser', userData);
                 commit('setUserHobbies', userHobbies);
 
@@ -57,6 +57,7 @@ export default createStore({
                 if (user) {
                     const userData = await apiService.get(`/users/${user.uid}`);
                     const userHobbies = await apiService.get(`/users/${userData.id}/hobbies`);
+                    console.log(userData)
                     commit('setUser', userData);
                     commit('setUserHobbies', userHobbies);
                 } else {
