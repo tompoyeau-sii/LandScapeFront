@@ -256,6 +256,8 @@ export default {
       this.from = "";
       this.to = "";
       this.waypoints = [];
+      this.meteoFrom = null;  // Réinitialiser la météo de départ
+      this.meteoTo = null;    // Réinitialiser la météo d'arrivée
       this.$emit("stopRoute");
     },
     showFromList() {
