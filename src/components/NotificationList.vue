@@ -15,7 +15,7 @@
         <v-list-item v-for="(notification, index) in unreadNotifications" :key="index">
           {{ notification.message }}
           <template v-slot:append>
-            <v-btn icon="mdi-close" variant="text" @click="markAsRead(notification, index)">
+            <v-btn icon="mdi-close" variant="text" @click="markAsRead(notification)">
             </v-btn>
           </template>
         </v-list-item>
@@ -51,20 +51,13 @@ export default {
     },
   },
   methods: {
-    async markAsRead(notification, index) {
+    async markAsRead(notification) {
       try {
-        // Preserve original data
-        const updatedNotification = { ...notification, isRead: true };
-        // console.log(updatedNotification);
-
         // Send the update to the server
-        await apiService.put(`/notifications/${notification.id}`, updatedNotification);
+        await apiService.put(`/notifications/${notification.id}`, { isRead: true });
 
         // Update the notification locally
         notification.isRead = true;
-
-        // Optionally, you can remove the notification from the unreadNotifications list
-        this.unreadNotifications.splice(index, 1);
       } catch (error) {
         console.error('échec de la mise en lecture:', error);
       }
