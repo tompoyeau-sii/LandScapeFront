@@ -24,7 +24,8 @@
           <div v-if="meteoFrom">
             <p>Météo a la destination</p>
             <p>Température : {{ meteoFrom.temperature }}°C</p>
-            <p>Précipitations : {{ meteoFrom.precipitation }} mm</p>
+            <!-- <p>Précipitations : {{ meteoFrom.precipitation }} mm</p> -->
+            <p>Temps : {{ meteoFrom.weatherDescription }}</p>
           </div>
         </div>
       </div>
@@ -64,23 +65,10 @@
       </div>
       <div v-if="meteoTo">
           <p>Météo à l'arrivée</p>
-          <p>Température : {{ meteoTo.temperature }}°C</p>
-          <p>Précipitations : {{ meteoTo.precipitation }} mm</p>
+          <p><span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C </p>
+          <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
+          <p>Temps : {{ meteoTo.weatherDescription }}</p>
         </div>
-      <!-- Ajouter une Étapes -->
-
-
-      <!-- <button
-        v-if="from && to"
-        class="add-waypoint"
-        type="button"
-        @click="addWaypoint"
-      >
-        <i class="fas fa-plus"></i>
-        Ajouter une étape
-      </button> -->
-
-      <!-- Arrêter la recherche -->
       <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
     </div>
     <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
@@ -138,13 +126,9 @@ export default {
     },
     async getWeather(lat, lon, meteoType) {
       try {
-        const date = new Date().toISOString().split('T')[0]; // Obtient la date du jour au format YYYY-MM-DD
+        const date = new Date().toISOString().split('T')[0];
         const weatherData = await openMeteoService.getWeather(lat, lon, date);
-
-        // Obtenez l'heure actuelle
         const now = new Date();
-
-        // Trouvez l'index de l'heure la plus proche
         let closestTimeIndex = 0;
         let closestTimeDiff = Infinity;
 
@@ -158,16 +142,54 @@ export default {
           }
         }
 
-        // Utilisez cet index pour obtenir les données météo correspondantes
+        const weatherCode = weatherData.hourly.weathercode[closestTimeIndex];
+        const weatherDescription = this.getWeatherDescription(weatherCode);
+
         this[meteoType] = {
           temperature: weatherData.hourly.temperature_2m[closestTimeIndex],
-          precipitation: weatherData.hourly.precipitation[closestTimeIndex]
+          precipitation: weatherData.hourly.precipitation[closestTimeIndex],
+          weatherDescription: weatherDescription // Ajouter la description du temps
         };
+
         console.log(meteoType, this[meteoType]);
       } catch (error) {
         console.error('Erreur lors de la récupération des données météo :', error);
       }
     },
+    getWeatherDescription(weatherCode) {
+      const weatherCodes = {
+        0: 'Ciel clair',
+        1: 'Principalement clair',
+        2: 'Partiellement nuageux',
+        3: 'Couvert',
+        45: 'Brouillard',
+        48: 'Dépôts de brouillard givrant',
+        51: 'Bruine légère',
+        53: 'Bruine modérée',
+        55: 'Bruine dense',
+        56: 'Bruine verglaçante légère',
+        57: 'Bruine verglaçante dense',
+        61: 'Pluie faible',
+        63: 'Pluie modérée',
+        65: 'Pluie forte',
+        66: 'Pluie verglaçante légère',
+        67: 'Pluie verglaçante forte',
+        71: 'Chute de neige légère',
+        73: 'Chute de neige modérée',
+        75: 'Chute de neige dense',
+        77: 'Grains de neige',
+        80: 'Averses de pluie faibles',
+        81: 'Averses de pluie modérées',
+        82: 'Averses de pluie violentes',
+        85: 'Averses de neige faibles',
+        86: 'Averses de neige fortes',
+        95: 'Orage',
+        96: 'Orage avec grêle légère',
+        99: 'Orage avec grêle forte',
+      };
+
+      return weatherCodes[weatherCode] || 'Code météo inconnu';
+  },
     async updateRoute() {
       try {
         let fromCoords;

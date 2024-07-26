@@ -9,7 +9,7 @@ const openMeteoService = {
         params: {
           latitude: lat,
           longitude: lon,
-          hourly: 'temperature_2m,precipitation',
+          hourly: 'temperature_2m,precipitation,weathercode',
           start: date, // Date de début
           end: date,   // Date de fin
         },
