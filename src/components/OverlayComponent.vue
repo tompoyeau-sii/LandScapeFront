@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h3 class="mt-3">WecanScape</h3>
+    <h3 class="mt-3">LandS'Cap</h3>
     <search-component
       @stopRoute="$emit('stopRoute')"
       @selectRoute="$emit('selectRoute', $event)"

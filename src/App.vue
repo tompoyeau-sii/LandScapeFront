@@ -1,16 +1,16 @@
 <template>
   <div id="app">
     <v-snackbar
-     v-model="notificationService.state.snackbar"
-     :color="notificationService.state.snackbarColor"
+     v-model="AlertService.state.snackbar"
+     :color="AlertService.state.snackbarColor"
      :timeout="5000"
      top
      right
    >
-     <v-icon left>{{ notificationService.state.snackbarIcon }}</v-icon>
-     {{ notificationService.state.snackbarText }}
+     <v-icon left>{{ AlertService.state.snackbarIcon }}</v-icon>
+     {{ AlertService.state.snackbarText }}
      <template v-slot:action="{ attrs }">
-       <v-btn color="white" text v-bind="attrs" @click="notificationService.state.snackbar = false">
+       <v-btn color="white" text v-bind="attrs" @click="AlertService.state.snackbar = false">
          Close
        </v-btn>
      </template>
@@ -20,12 +20,12 @@
 </template>
 
 <script>
-import NotificationService from "@/services/notificationService.js";
+import AlertService from "@/services/alertService.js";
 export default {
   name: "App",
   setup() {
     return {
-      notificationService: NotificationService,
+      AlertService: AlertService,
     };
   },
 };
@@ -33,13 +33,14 @@ export default {
 
 <style>
 @import "~leaflet/dist/leaflet.css";
-
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poetsen+One&family=Satisfy&display=swap');
 html,
 body,
 #app {
   height: 100%;
   overflow: auto;
   margin: 0;
+  font-family: "Satisfy", cursive;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 </style>

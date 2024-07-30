@@ -25,6 +25,12 @@
               <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
             </button>
           </div>
+          <div v-if="meteoFrom">
+            <p>Météo a la destination</p>
+            <p>Température : {{ meteoFrom.temperature }}°C</p>
+            <!-- <p>Précipitations : {{ meteoFrom.precipitation }} mm</p> -->
+            <p>Temps : {{ meteoFrom.weatherDescription }}</p>
+          </div>
         </div>
       </div>
 
@@ -65,7 +71,6 @@
         </div>
       </div>
 
-      
       <v-btn
         v-if="from && to"
         @click="addWaypoint"
@@ -84,22 +89,17 @@
           <input v-model="to" placeholder="Destination" @focus="showToList" />
         </div>
       </div>
-
-      <!-- Ajouter une Étapes -->
-
-
-      <!-- <button
-        v-if="from && to"
-        class="add-waypoint"
-        type="button"
-        @click="addWaypoint"
-      >
-        <i class="fas fa-plus"></i>
-        Ajouter une étape
-      </button> -->
-
-      <!-- Arrêter la recherche -->
-      <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
+      <div v-if="meteoTo">
+        <p>Météo à l'arrivée</p>
+        <p>
+          <span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C
+        </p>
+        <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
+        <p>Temps : {{ meteoTo.weatherDescription }}</p>
+      </div>
+      <a class="stopSearch" v-if="from || to" @click="stopRoute">
+        Stopper la recherche
+      </a>
     </div>
     <town
       v-if="showFromOptions"
@@ -116,10 +116,12 @@
   </form>
 </template>
 
+
 <script>
 import mapApiService from "@/services/mapApiService";
 import geolocationService from "@/services/geolocationService";
 import town from "./TownList.vue";
+import openMeteoService from "@/services/openMeteoService";
 
 export default {
   components: { town },
@@ -136,41 +138,104 @@ export default {
       dragStartY: 0,
       showFromOptions: false,
       showToOptions: false,
+      meteoFrom: null,
+      meteoTo: null,
     };
   },
   methods: {
     async handleOptionSelected({ option, type }) {
+      const latitude = parseFloat(option.lat);
+      const longitude = parseFloat(option.lon);
+
       if (type === "from") {
         this.from = option.display_name;
-        let latitude = parseFloat(option.lat);
-        let longitude = parseFloat(option.lon);
         this.showFromOptions = false;
+        await this.getWeather(latitude, longitude, "meteoFrom");
         if (this.to === "") {
-          this.$emit("locationSelected", {
-            lat: latitude,
-            lng: longitude,
-          });
+          this.$emit("locationSelected", { lat: latitude, lng: longitude });
         }
       } else if (type === "to") {
         this.to = option.display_name;
-        let latitude = parseFloat(option.lat);
-        let longitude = parseFloat(option.lon);
         this.showToOptions = false;
+        await this.getWeather(latitude, longitude, "meteoTo");
         if (this.from === "") {
-          this.$emit("locationSelected", {
-            lat: latitude,
-            lng: longitude,
-          });
+          this.$emit("locationSelected", { lat: latitude, lng: longitude });
         }
       }
       this.updateRoute();
     },
+    async getWeather(lat, lon, meteoType) {
+      try {
+        const date = new Date().toISOString().split("T")[0];
+        const weatherData = await openMeteoService.getWeather(lat, lon, date);
+        const now = new Date();
+        let closestTimeIndex = 0;
+        let closestTimeDiff = Infinity;
 
-    //Met à jour le tracé de l'itinéraire
+        for (let i = 0; i < weatherData.hourly.time.length; i++) {
+          const weatherTime = new Date(weatherData.hourly.time[i]);
+          const timeDiff = Math.abs(weatherTime - now);
+
+          if (timeDiff < closestTimeDiff) {
+            closestTimeDiff = timeDiff;
+            closestTimeIndex = i;
+          }
+        }
+
+        const weatherCode = weatherData.hourly.weathercode[closestTimeIndex];
+        const weatherDescription = this.getWeatherDescription(weatherCode);
+
+        this[meteoType] = {
+          temperature: weatherData.hourly.temperature_2m[closestTimeIndex],
+          precipitation: weatherData.hourly.precipitation[closestTimeIndex],
+          weatherDescription: weatherDescription, // Ajouter la description du temps
+        };
+
+        console.log(meteoType, this[meteoType]);
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération des données météo :",
+          error
+        );
+      }
+    },
+    getWeatherDescription(weatherCode) {
+      const weatherCodes = {
+        0: "Ciel clair",
+        1: "Principalement clair",
+        2: "Partiellement nuageux",
+        3: "Couvert",
+        45: "Brouillard",
+        48: "Dépôts de brouillard givrant",
+        51: "Bruine légère",
+        53: "Bruine modérée",
+        55: "Bruine dense",
+        56: "Bruine verglaçante légère",
+        57: "Bruine verglaçante dense",
+        61: "Pluie faible",
+        63: "Pluie modérée",
+        65: "Pluie forte",
+        66: "Pluie verglaçante légère",
+        67: "Pluie verglaçante forte",
+        71: "Chute de neige légère",
+        73: "Chute de neige modérée",
+        75: "Chute de neige dense",
+        77: "Grains de neige",
+        80: "Averses de pluie faibles",
+        81: "Averses de pluie modérées",
+        82: "Averses de pluie violentes",
+        85: "Averses de neige faibles",
+        86: "Averses de neige fortes",
+        95: "Orage",
+        96: "Orage avec grêle légère",
+        99: "Orage avec grêle forte",
+      };
+
+      return weatherCodes[weatherCode] || "Code météo inconnu";
+    },
     async updateRoute() {
       try {
         let fromCoords;
-        // On regarde si on ville à était séléctionner comme point de départ et on récupère ses coordonnées ou sinon on utilise la localisation
         if (this.from) {
           fromCoords = await mapApiService.getCoordinates(this.from);
         } else {
@@ -181,26 +246,19 @@ export default {
           };
         }
 
-        //On récupére les coordonnées de la desination
         const toCoords = await mapApiService.getCoordinates(this.to);
         this.route = {
           coordinates: [
             [fromCoords.lat, fromCoords.lng],
             [toCoords.lat, toCoords.lng],
           ],
-
-          // par défault, la liste d'étape est vide
           waypoints: [],
         };
-        // On boucle sur les étapes
         for (let waypoint of this.waypoints) {
-          // Si on a des étapes
           if (waypoint.location) {
-            // On récupére les coordonnées
             const waypointCoords = await mapApiService.getCoordinates(
               waypoint.location
             );
-            // On les ajoutent pour le tracer de la route
             this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
           }
         }
@@ -213,32 +271,25 @@ export default {
         );
       }
     },
-    
-    //Utilisation de la géolocalisation de l'utilisateur
     async useCurrentLocation() {
       try {
-        // On récupère la position actuelle de l'utilisateur avec le service de geolocalisation
         const position = await geolocationService.getCurrentPosition();
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        // A partir des coordonnées on récupère une adresse
         const locationData = await mapApiService.getLocationData(lat, lng);
         this.from = locationData.city;
         this.updateRoute();
+        await this.getWeather(lat, lng, "meteoFrom");
       } catch (error) {
-        if(error.code == 1) {
+        if (error.code === 1) {
           console.error("Erreur de géolocalisation :", error);
         }
       }
     },
-
-    //Permet d'ajouter une étape à l'itinéraire
     addWaypoint() {
       this.waypoints.push({ location: "", options: [] });
     },
-
-    // Fait la recherche dans l'api pour récupérer la localisation de la waypoint
     async searchWaypointOptions(index) {
       const waypoint = this.waypoints[index];
       if (waypoint.location.length < 3) {
@@ -247,8 +298,6 @@ export default {
       }
       try {
         const options = await mapApiService.searchLocation(waypoint.location);
-        console.log(options);
-        // Met à jour directement l'objet dans l'array réactif
         this.waypoints[index] = { ...waypoint, options };
       } catch (error) {
         console.error(
@@ -259,35 +308,29 @@ export default {
         );
       }
     },
-
-    //Retire une étape de l'itinéraire et met à jour le tracé
     removeWaypoint(index) {
       this.waypoints.splice(index, 1);
       this.updateRoute();
     },
-
     selectWaypointOption(index, option) {
-      // Met à jour directement l'objet dans l'array réactif
       this.waypoints[index] = {
         location: option.display_name,
         options: [],
       };
       this.updateRoute();
     },
-
-    // Réinitialise les valeurs des variables de création d'une route et emet un signal pour le composant parent
     stopRoute() {
       this.from = "";
       this.to = "";
       this.waypoints = [];
+      this.meteoFrom = null; // Réinitialiser la météo de départ
+      this.meteoTo = null; // Réinitialiser la météo d'arrivée
       this.$emit("stopRoute");
     },
-    // Affiche la recherche pour le from et cache celle du to
     showFromList() {
       this.showFromOptions = true;
       this.showToOptions = false;
     },
-    // Affiche la recherche pour le to et cache celle du from
     showToList() {
       this.showToOptions = true;
       this.showFromOptions = false;
@@ -306,26 +349,20 @@ export default {
         event.clientX,
         event.clientY
       );
-      const newDragOverIndex = [
-        ...dragOverElement.parentElement.children,
-      ].indexOf(dragOverElement);
-
-      console.log(
-        `Dragging over index: ${newDragOverIndex}, Current drag index: ${this.dragIndex}`
-      );
-
-      if (
-        newDragOverIndex !== this.dragOverIndex &&
-        newDragOverIndex >= 0 &&
-        newDragOverIndex < this.waypoints.length
-      ) {
-        this.dragOverIndex = newDragOverIndex;
-        const draggedItem = this.waypoints.splice(this.dragIndex, 1)[0];
-        this.waypoints.splice(this.dragOverIndex, 0, draggedItem);
-        this.dragIndex = this.dragOverIndex;
+      if (dragOverElement && dragOverElement.matches(".waypoint")) {
+        const newIndex = Array.from(
+          dragOverElement.parentElement.children
+        ).indexOf(dragOverElement);
+        if (newIndex !== this.dragOverIndex) {
+          this.dragOverIndex = newIndex;
+        }
       }
     },
     endDrag() {
+      if (this.dragging && this.dragOverIndex !== null) {
+        const [removed] = this.waypoints.splice(this.dragIndex, 1);
+        this.waypoints.splice(this.dragOverIndex, 0, removed);
+      }
       this.dragging = false;
       this.dragIndex = null;
       this.dragOverIndex = null;
@@ -336,7 +373,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
 
