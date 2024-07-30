@@ -1,20 +1,46 @@
 <template>
   <div class="container pb-3 pl-3 pr-3">
     <h3 class="mt-3">Activités</h3>
-    <ul>
-      <li class="poi pa-2 rounded-lg" v-for="poi in filteredPoiList" :key="poi.id" @click="selectPoi(poi)">
+    <!-- <ul>
+      <li
+        class="poi pa-2 rounded-lg"
+        v-for="poi in filteredPoiList"
+        :key="poi.id"
+        @click="selectPoi(poi)"
+      >
         <span class="poi-name">{{ poi.tags.name }}</span>
         <span class="poi-rating">
           {{ getRandomRating(poi.id) }}
           <v-icon class="rating-icon" icon="mdi-star"></v-icon>
         </span>
-      </li>
-    </ul>
+      </li> -->
+      <v-expansion-panels>
+        <v-expansion-panel
+          
+          v-for="poi in filteredPoiList"
+          :key="poi.id"
+          @click="selectPoi(poi)"
+        >
+          <v-expansion-panel-title>
+            <span class="poi-name">{{ poi.tags.name }}</span>
+            <span class="poi-rating">
+              {{ getRandomRating(poi.id) }}
+              <v-icon class="rating-icon" icon="mdi-star"></v-icon>
+            </span>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <a>Définir comme destination</a>
+            <br>
+            <a>Ajouter cette étape</a>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    <!-- </ul> -->
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { reactive } from "vue";
 
 export default {
   props: {
@@ -41,20 +67,20 @@ export default {
   computed: {
     filteredPoiList() {
       const uniqueNames = new Set();
-      return this.poiList.filter(poi => {
+      return this.poiList.filter((poi) => {
         if (poi.tags && poi.tags.name && !uniqueNames.has(poi.tags.name)) {
           uniqueNames.add(poi.tags.name);
           return true;
         }
         return false;
       });
-    }
+    },
   },
   methods: {
     selectPoi(poi) {
-      this.$emit('poi-selected', poi);
-    }
-  }
+      this.$emit("poi-selected", poi);
+    },
+  },
 };
 </script>
 
@@ -72,10 +98,7 @@ h3 {
 }
 
 .poi {
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between; /* Ajoute de l'espace entre les éléments */
-  align-items: center;
+  box-shadow: none!important;
 }
 
 .poi-name {
@@ -89,6 +112,7 @@ h3 {
 
 .rating-icon {
   margin-left: 0.25rem; /* Ajoute un peu d'espace entre la note et l'icône */
+  color: orange;
 }
 
 .poi:hover {
