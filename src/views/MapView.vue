@@ -9,6 +9,11 @@
     ></overlay>
     <panel></panel>
   </div>
+  <PoiList
+    v-if="poiList"
+    :poiList="poiList"
+    @poi-selected="handlePoiSelected"
+  ></PoiList>
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
@@ -21,160 +26,156 @@ import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
+import poiService from "@/services/poiService";
 import Overlay from "@/components/OverlayComponent.vue";
+import PoiList from "@/components/PoiListComponent.vue";
 import { mapState } from "vuex";
 import {
   createMarker,
+  createPoiMarker,
   createRouteControl,
   fitMapToBounds,
 } from "@/utils/mapUtils";
-import Panel from '@/components/PanelComponent.vue';
+import Panel from "@/components/PanelComponent.vue";
 
 export default {
   name: "MapView",
   components: {
     Overlay,
     Panel,
+    PoiList,
   },
   data() {
     return {
       map: null,
       routeControl: null,
-      point: null,
+      poiList: null,
       startMarker: null,
       endMarker: null,
+      poiMarkers: [], // Tableau pour stocker les marqueurs de POI
       routeDistance: "0",
       routeTime: "0",
-      notifications: [
-        { title: "Notification 1", body: "This is notification 1" },
-        { title: "Notification 2", body: "This is notification 2" },
-        { title: "Notification 3", body: "This is notification 3" },
-      ],
     };
   },
   computed: {
-    ...mapState(["user"]), // Ajoutez l'état de l'utilisateur depuis Vuex
+    ...mapState(["user"]),
   },
   mounted() {
     this.initializeMap();
   },
   methods: {
-    // Initialise la carte
     initializeMap() {
       this.map = L.map("map", {
         zoomControl: false,
-        // On set la view sur des coordonnées (ici Le mans)
       }).setView([48.0061, 0.1996], 8);
-      // On récupère les tuiles de google maps
+
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 20,
-        // subdomains: ["mt0", "mt1", "mt2", "mt3"],
       }).addTo(this.map);
     },
 
-    //Gestion du zoom de la carte avec en paramètre une latitude et longitude
     zoomToLocation(lat, lng) {
-      // Zoom initier à 13 mais peut-être modifier pour avoir un plus gros grossissement ou plus petit (20 => zoommer / 1 => dézoomer)
       this.map.setView([lat, lng], 13);
     },
 
-    // Méthode permettant de récupérer la 1er input entrée par l'utilisateur pour pouvoir aller faire un zoom sur la carte
     handleLocationSelected(location) {
-      this.point = location;
-      // Zoom sur la localisation
       this.zoomToLocation(location.lat, location.lng);
-      // Création du marker
-      this.startMarker = this.updateMarker(this.startMarker, location, true);
+
+      poiService
+        .getPOI(location.lat, location.lng)
+        .then((data) => {
+          console.log("Points d'intérêt:", data);
+          this.poiList = data;
+        })
+        .catch((error) => {
+          console.error("Erreur:", error);
+        });
+
+      this.startMarker = this.updateMarker(this.startMarker, location);
     },
 
-    //Permet de modifier l'emplacement d'un marker
     updateMarker(marker, location) {
       if (marker) this.map.removeLayer(marker);
       return createMarker(this.map, location);
     },
-    // Création de l'itinéraire
+
+    updatePoiMarker(location) {
+      const marker = createPoiMarker(this.map, location);
+      this.poiMarkers.push(marker); // Ajouter le marqueur au tableau poiMarkers
+      return marker;
+    },
+
     showRoute(route) {
-      //On enlève les markers déjà présents
       this.removeMarkers();
-      //On regarde s'il n'y a pas déjà une route qui existe
       if (this.routeControl) {
-        //Si oui, on la supprime
         this.map.removeControl(this.routeControl);
       }
 
-      // On créer la route via la méthode du fichier mapUtils.js
       this.routeControl = createRouteControl(this.map, route);
 
-      // Ajout de l'écouteur d'événement pour obtenir les informations de la route
       this.routeControl.on("routesfound", (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
-        this.routeDistance = (summary.totalDistance / 1000).toFixed(0); // Convert to kilometers
-        this.routeTime = (summary.totalTime / 60).toFixed(2); // Convert to minutes
+        this.routeDistance = (summary.totalDistance / 1000).toFixed(0);
+        this.routeTime = (summary.totalTime / 60).toFixed(2);
 
-        // Émettre l'événement pour envoyer les données à Overlay
         this.$emit("update:distance", this.routeDistance);
         this.$emit("update:time", this.routeTime);
       });
 
-      //On gére le zoom pour que les points de départ et d'arrivée soient visibles par l'utilisateur
       fitMapToBounds(this.map, route.coordinates[0], route.coordinates[1]);
     },
 
-    // Permet de retirer les markers
     removeMarkers() {
       if (this.startMarker) {
-        // On retire le marker de départ de la carte
         this.map.removeLayer(this.startMarker);
-        // On réinitialise la valeur du marker à null
         this.startMarker = null;
       }
       if (this.endMarker) {
-        // On retire le marker d'arrivé de la carte
         this.map.removeLayer(this.endMarker);
-        // On réinitialise la valeur du marker à null
         this.endMarker = null;
       }
+      this.poiMarkers.forEach(marker => {
+        this.map.removeLayer(marker);
+      });
+      this.poiMarkers = []; // Réinitialiser le tableau des marqueurs de POI
     },
 
-    // Stop l'itinéraire
     stopRoute() {
+      this.poiList = null;
+      this.removeMarkers();
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
-        this.routeDistance = 0; // Convert to kilometers
-        this.routeTime = 0; // Convert to minutes
-
-        // Émettre l'événement pour envoyer les données à Overlay
-        this.$emit("update:distance", this.routeDistance);
-        this.$emit("update:time", this.formattedRouteTime);
       }
+      this.routeDistance = 0;
+      this.routeTime = 0;
+
+      this.$emit("update:distance", this.routeDistance);
+      this.$emit("update:time", this.routeTime);
+    },
+
+    handlePoiSelected(poi) {
+      const location = { lat: poi.lat, lng: poi.lon };
+      this.updatePoiMarker(location);
+      this.zoomToLocation(location.lat, location.lng);
     },
   },
 };
 </script>
 
 <style>
-/* .header {
-  z-index: 2;
-    position: fixed;
-  display: flex;
-  width: 100%;
-  padding: 1%;
-  justify-content: space-between;
-} */
 #map {
   z-index: 1;
   width: 100%;
   height: 100vh;
 }
 
-/* Déplace l'élément en bas à gauche */
 .leaflet-bar {
   display: none;
   position: fixed;
-  bottom: 0; /* Place l'élément en bas de l'écran */
-  left: 0; /* Place l'élément à gauche de l'écran */
-  margin: 10px; /* Ajoute une marge pour l'espacement */
+  bottom: 0;
+  left: 0;
+  margin: 10px;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3),
     0 2px 6px 2px rgba(60, 64, 67, 0.15);
   margin: 1%;

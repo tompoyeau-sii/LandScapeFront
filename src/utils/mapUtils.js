@@ -4,6 +4,7 @@ import L from "leaflet";
 import startIconUrl from "@/assets/img/start.png";
 import endIconUrl from "@/assets/img/end.png";
 import stepIconUrl from "@/assets/img/step.png";
+import poiIconUrl from "@/assets/img/poi.png"
 
 // En lui passant une map ainsi que des coordonnées en paramètre, cette méthode va créer un marker sur la carte
 export function createMarker(map, location) {
@@ -16,6 +17,19 @@ export function createMarker(map, location) {
         }),
     }).addTo(map);
 }
+
+export function createPoiMarker(map, location) {
+    return L.marker([location.lat, location.lng], {
+        icon: L.icon({
+            iconUrl: poiIconUrl,
+            iconRetinaUrl: poiIconUrl,
+            iconSize: [41, 41],
+            popupAnchor: [1, -34],
+        }),
+    }).addTo(map);
+}
+
+
 // Permet de créer un itinéraire
 export function createRouteControl(map, route) {
     // On défini la liste d'étapes à vide au début
