@@ -34,7 +34,7 @@
                 required
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
                 v-model="user.birthDate"
                 :rules="[rules.required]"
@@ -43,6 +43,12 @@
                 variant="solo-filled"
                 required
               ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox
+                v-model="isAELChecked"
+                label="AEL"
+              ></v-checkbox>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -98,6 +104,7 @@ export default {
         email: "",
         password: "",
       },
+      isAELChecked: false, // Propriété pour la case à cocher AEL
       rules: {
         required: (value) => !!value || "Ce champ est requis.",
         email: (value) => {
@@ -118,21 +125,24 @@ export default {
           );
           const user = userCredential.user;
 
+          // Formatage des noms
           this.user.lastName =
             this.user.lastName.charAt(0).toUpperCase() +
             this.user.lastName.slice(1).toLowerCase();
-            
           this.user.firstName =
             this.user.firstName.charAt(0).toUpperCase() +
             this.user.firstName.slice(1).toLowerCase();
 
+          // Détermination de l'id du droit
+          const rightId = this.isAELChecked ? 3 : 1;
+console.log(rightId)
           // Envoyer les données utilisateur à l'API Java Spring Boot
           const userData = {
             name: this.user.lastName,
             firstName: this.user.firstName,
             birthdate: this.user.birthDate,
             uId: user.uid,
-            right: { id: 1 }, // Assuming `right` with id 1 is the default right
+            right: { id: rightId },
           };
 
           await apiService.post("/users", userData);
