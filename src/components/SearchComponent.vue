@@ -1,19 +1,10 @@
 <template>
   <form>
+    <!-- Départ -->
     <div class="input-container">
-      <!-- Départ -->
       <div>
         <div class="waypoint">
           <div class="input-wrapper">
-            <!-- <v-text-field
-            placeholder="Départ"
-            v-model="from"
-            prepend-inner-icon="mdi-map-marker"
-            variant="solo-filled"
-             @focus="showFromList"
-            append-inner-icon="mdi-crosshairs-gps"
-          @click:append-inner="useCurrentLocation()"
-        ></v-text-field> -->
             <i class="fas fa-map-marker-alt searchIcon"></i>
             <input
               class="input-waypoint"
@@ -25,62 +16,114 @@
               <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
             </button>
           </div>
-          <div v-if="meteoFrom">
-            <p>Météo a la destination</p>
-            <p>Température : {{ meteoFrom.temperature }}°C</p>
-            <!-- <p>Précipitations : {{ meteoFrom.precipitation }} mm</p> -->
-            <p>Temps : {{ meteoFrom.weatherDescription }}</p>
+          <div v-if="from">
+            <v-btn @click="dialogMeteoFrom = true" class="weather-button" icon>
+              <span class="mdi mdi-weather-partly-cloudy"></span>
+            </v-btn>
+
+            <v-dialog v-model="dialogMeteoFrom" max-width="400px">
+              <v-card>
+                <v-card-title>
+                  <span class="headline">Météo au départ</span>
+                </v-card-title>
+                <v-card-text>
+                  <div v-if="meteoFrom">
+                    <p>
+                      <span class="mdi mdi-thermometer"></span
+                      >{{ meteoFrom.temperature }}°C
+                      <span
+                        :class="'mdi ' + getWeatherIcon(meteoFrom.weatherDescription)"
+                      ></span>
+                      {{ meteoFrom.weatherDescription }}
+                      <span class="mdi mdi-weather-rainy"></span>{{ meteoFrom.precipitation }}mm
+                    </p>
+                    <v-btn
+                      type="button"
+                      @click.prevent="toggleForecastFromVisibility"
+                      class="forecast-button"
+                      text
+                    >
+                      {{ showForecastFrom ? 'Masquer la prévision sur 5 heures' : 'Afficher la prévision sur 5 heures' }}
+                    </v-btn>
+
+                    <div v-if="showForecastFrom" class="forecast-container">
+                      <p
+                        v-for="(forecast, index) in next5HoursForecastFrom"
+                        :key="index"
+                      >
+                        <span>{{ forecast.time }}: {{ forecast.temperature }}°C, {{ forecast.weatherDescription }}, {{ forecast.precipitation }} mm</span>
+                      </p>
+                    </div>
+                  </div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="primary" text @click="dialogMeteoFrom = false">Fermer</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </div>
         </div>
       </div>
 
       <!-- Étapes -->
-      <div
-        v-for="(waypoint, index) in waypoints"
-        :key="index"
-        :class="{ dragging: dragIndex === index }"
-      >
+      <div v-for="(waypoint, index) in waypoints" :key="index" :class="{ dragging: dragIndex === index }">
         <div class="waypoint">
           <div class="input-wrapper">
             <i class="far fa-regular fa-circle searchIcon"></i>
-            <input
-              class="input-waypoint"
-              v-model="waypoint.location"
-              placeholder="Ajouter une étape"
-              @input="searchWaypointOptions(index)"
-            />
-            <button
-              class="remove-button"
-              @click.prevent="removeWaypoint(index)"
-            >
-              <i
-                :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"
-              ></i>
+            <input class="input-waypoint" v-model="waypoint.location" placeholder="Ajouter une étape"
+              @input="searchWaypointOptions(index)" />
+            <button class="remove-button" @click.prevent="removeWaypoint(index)">
+              <i :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"></i>
             </button>
           </div>
         </div>
         <div class="town-list" v-if="waypoint.options.length">
-          <p
-            class="list-element"
-            v-for="option in waypoint.options"
-            :key="option.place_id"
-            @click="selectWaypointOption(index, option)"
-          >
+          <p class="list-element" v-for="option in waypoint.options" :key="option.place_id"
+            @click="selectWaypointOption(index, option)">
             {{ option.display_name }}
           </p>
         </div>
       </div>
 
-      <v-btn
-        v-if="from && to"
-        @click="addWaypoint"
-        color="blue"
-        variant="tonal"
-        prepend-icon="mdi-plus"
-        class="ma-3 text-none"
-      >
+      <v-btn v-if="from && to" @click="addWaypoint" color="blue" variant="tonal" prepend-icon="mdi-plus"
+        class="ma-3 text-none">
         Ajouter une étape
       </v-btn>
+      <v-dialog v-model="dialogMeteoTo" max-width="400px">
+  <v-card>
+    <v-card-title>
+      <span class="headline">Météo à l'arrivée</span>
+    </v-card-title>
+    <v-card-text>
+      <div v-if="meteoTo">
+        <p>
+          <span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C
+          <span :class="'mdi ' + getWeatherIcon(meteoTo.weatherDescription)"></span>
+          {{ meteoTo.weatherDescription }}
+          <span class="mdi mdi-weather-rainy"></span>{{ meteoTo.precipitation }}mm
+        </p>
+        <v-btn
+          type="button"
+          @click.prevent="toggleForecastVisibility"
+          class="forecast-button"
+          text
+        >
+          {{ showForecast ? 'Masquer la prévision sur 5 heures' : 'Afficher la prévision sur 5 heures' }}
+        </v-btn>
+        <div v-if="showForecast" class="forecast-container">
+          <p v-for="(forecast, index) in next5HoursForecast" :key="index">
+            <span>{{ forecast.time }}: {{ forecast.temperature }}°C, {{ forecast.weatherDescription }}, {{ forecast.precipitation }} mm</span>
+          </p>
+        </div>
+      </div>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" text @click="dialogMeteoTo = false">Fermer</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
       <!-- Destination -->
       <div>
@@ -90,59 +133,71 @@
         </div>
       </div>
       <div v-if="meteoTo">
-        <p>Météo à l'arrivée</p>
-        <p>
-          <span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C
-        </p>
-        <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
-        <p>Temps : {{ meteoTo.weatherDescription }}</p>
+          <v-btn @click="dialogMeteoTo = true" class="weather-button" icon>
+              <span class="mdi mdi-weather-partly-cloudy"></span>
+            </v-btn>
       </div>
-      <a class="stopSearch" v-if="from || to" @click="stopRoute">
-        Stopper la recherche
-      </a>
+      <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
     </div>
-    <town
-      v-if="showFromOptions"
-      :searchOption="from"
-      type="from"
-      @option-selected="handleOptionSelected"
-    />
-    <town
-      v-if="showToOptions"
-      :searchOption="to"
-      type="to"
-      @option-selected="handleOptionSelected"
-    />
+    <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
+    <town v-if="showToOptions" :searchOption="to" type="to" @option-selected="handleOptionSelected" />
   </form>
 </template>
-
 
 <script>
 import mapApiService from "@/services/mapApiService";
 import geolocationService from "@/services/geolocationService";
 import town from "./TownList.vue";
-import openMeteoService from "@/services/openMeteoService";
+import openMeteoService from '@/services/openMeteoService';
 
 export default {
   components: { town },
   data() {
     return {
       from: "",
+      dialogMeteoFrom: false,
+      dialogMeteoTo: false,
       to: "",
-      toOptions: [],
       waypoints: [],
       route: [],
       dragging: false,
       dragIndex: null,
       dragOverIndex: null,
-      dragStartY: 0,
       showFromOptions: false,
       showToOptions: false,
       meteoFrom: null,
       meteoTo: null,
+      showForecast: false,
+      next5HoursForecast: [],
+      showForecastFrom: false,
+      next5HoursForecastFrom: []
     };
   },
   methods: {
+    getWeatherIcon(weatherDescription) {
+      const iconClasses = {
+        'Ensoleillé': 'mdi-white-balance-sunny',
+        'Nuageux': 'mdi-cloud-outline',
+        'Brouillard': 'mdi-weather-fog',
+        'Bruine': 'mdi-weather-rainy',
+        'Pluie': 'mdi-weather-pouring',
+        'Verglas': 'mdi-weather-snowy-rainy',
+        'Neige': 'mdi-weather-snowy',
+        'Orage': 'mdi-weather-lightning',
+        'Code météo inconnu': 'mdi-help-circle-outline'
+      };
+
+      return iconClasses[weatherDescription] || 'mdi-help-circle-outline';
+    },
+
+    toggleForecastVisibility() {
+      this.showForecast = !this.showForecast;
+    },
+
+    toggleForecastFromVisibility() {
+      this.showForecastFrom = !this.showForecastFrom;
+    },
+
     async handleOptionSelected({ option, type }) {
       const latitude = parseFloat(option.lat);
       const longitude = parseFloat(option.lon);
@@ -164,9 +219,10 @@ export default {
       }
       this.updateRoute();
     },
+
     async getWeather(lat, lon, meteoType) {
       try {
-        const date = new Date().toISOString().split("T")[0];
+        const date = new Date().toISOString().split('T')[0];
         const weatherData = await openMeteoService.getWeather(lat, lon, date);
         const now = new Date();
         let closestTimeIndex = 0;
@@ -184,55 +240,72 @@ export default {
 
         const weatherCode = weatherData.hourly.weathercode[closestTimeIndex];
         const weatherDescription = this.getWeatherDescription(weatherCode);
-
         this[meteoType] = {
           temperature: weatherData.hourly.temperature_2m[closestTimeIndex],
           precipitation: weatherData.hourly.precipitation[closestTimeIndex],
-          weatherDescription: weatherDescription, // Ajouter la description du temps
+          weatherDescription: weatherDescription
         };
 
-        console.log(meteoType, this[meteoType]);
+        if (meteoType === "meteoTo") {
+          this.next5HoursForecast = this.extractNext5HoursForecast(weatherData.hourly, closestTimeIndex);
+        } else if (meteoType === "meteoFrom") {
+          this.next5HoursForecastFrom = this.extractNext5HoursForecast(weatherData.hourly, closestTimeIndex);
+        }
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des données météo :",
-          error
-        );
+        console.error('Erreur lors de la récupération des données météo :', error);
       }
     },
+
+    extractNext5HoursForecast(hourlyData, startIndex) {
+  const next5Hours = [];
+  for (let i = 0; i < 5; i++) {
+    const index = startIndex + i;
+    if (index >= hourlyData.time.length) break;
+    next5Hours.push({
+      time: new Date(hourlyData.time[index]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      temperature: hourlyData.temperature_2m[index],
+      weatherDescription: this.getWeatherDescription(hourlyData.weathercode[index]),
+      precipitation: hourlyData.precipitation[index]
+    });
+  }
+  return next5Hours;
+},
+
     getWeatherDescription(weatherCode) {
       const weatherCodes = {
-        0: "Ciel clair",
-        1: "Principalement clair",
-        2: "Partiellement nuageux",
-        3: "Couvert",
-        45: "Brouillard",
-        48: "Dépôts de brouillard givrant",
-        51: "Bruine légère",
-        53: "Bruine modérée",
-        55: "Bruine dense",
-        56: "Bruine verglaçante légère",
-        57: "Bruine verglaçante dense",
-        61: "Pluie faible",
-        63: "Pluie modérée",
-        65: "Pluie forte",
-        66: "Pluie verglaçante légère",
-        67: "Pluie verglaçante forte",
-        71: "Chute de neige légère",
-        73: "Chute de neige modérée",
-        75: "Chute de neige dense",
-        77: "Grains de neige",
-        80: "Averses de pluie faibles",
-        81: "Averses de pluie modérées",
-        82: "Averses de pluie violentes",
-        85: "Averses de neige faibles",
-        86: "Averses de neige fortes",
-        95: "Orage",
-        96: "Orage avec grêle légère",
-        99: "Orage avec grêle forte",
+        0: 'Ensoleillé',
+        1: 'Ensoleillé',
+        2: 'Nuageux',
+        3: 'Nuageux',
+        45: 'Brouillard',
+        48: 'Brouillard',
+        51: 'Bruine',
+        53: 'Bruine',
+        55: 'Bruine',
+        56: 'Bruine',
+        57: 'Bruine',
+        61: 'Pluie',
+        63: 'Pluie',
+        65: 'Pluie',
+        66: 'Verglas',
+        67: 'Verglas',
+        71: 'Neige',
+        73: 'Neige',
+        75: 'Neige',
+        77: 'Neige',
+        80: 'Pluie',
+        81: 'Pluie',
+        82: 'Pluie',
+        85: 'Pluie',
+        86: 'Pluie',
+        95: 'Orage',
+        96: 'Orage',
+        99: 'Orage',
       };
 
-      return weatherCodes[weatherCode] || "Code météo inconnu";
+      return weatherCodes[weatherCode] || 'Code météo inconnu';
     },
+
     async updateRoute() {
       try {
         let fromCoords;
@@ -271,6 +344,7 @@ export default {
         );
       }
     },
+
     async useCurrentLocation() {
       try {
         const position = await geolocationService.getCurrentPosition();
@@ -287,9 +361,11 @@ export default {
         }
       }
     },
+
     addWaypoint() {
       this.waypoints.push({ location: "", options: [] });
     },
+
     async searchWaypointOptions(index) {
       const waypoint = this.waypoints[index];
       if (waypoint.location.length < 3) {
@@ -301,17 +377,17 @@ export default {
         this.waypoints[index] = { ...waypoint, options };
       } catch (error) {
         console.error(
-          `Erreur lors de la récupération des suggestions pour l'étape ${
-            index + 1
-          } :`,
+          `Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`,
           error
         );
       }
     },
+
     removeWaypoint(index) {
       this.waypoints.splice(index, 1);
       this.updateRoute();
     },
+
     selectWaypointOption(index, option) {
       this.waypoints[index] = {
         location: option.display_name,
@@ -319,22 +395,28 @@ export default {
       };
       this.updateRoute();
     },
+
     stopRoute() {
       this.from = "";
       this.to = "";
       this.waypoints = [];
-      this.meteoFrom = null; // Réinitialiser la météo de départ
-      this.meteoTo = null; // Réinitialiser la météo d'arrivée
+      this.meteoFrom = null;
+      this.meteoTo = null;
+      this.next5HoursForecast = [];
+      this.next5HoursForecastFrom = [];
       this.$emit("stopRoute");
     },
+
     showFromList() {
       this.showFromOptions = true;
       this.showToOptions = false;
     },
+
     showToList() {
       this.showToOptions = true;
       this.showFromOptions = false;
     },
+
     startDrag(event, index) {
       this.dragging = true;
       this.dragIndex = index;
@@ -342,6 +424,7 @@ export default {
       document.addEventListener("mousemove", this.onDrag);
       document.addEventListener("mouseup", this.endDrag);
     },
+
     onDrag(event) {
       if (!this.dragging) return;
 
@@ -358,6 +441,7 @@ export default {
         }
       }
     },
+
     endDrag() {
       if (this.dragging && this.dragOverIndex !== null) {
         const [removed] = this.waypoints.splice(this.dragIndex, 1);
@@ -373,6 +457,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
 
@@ -461,6 +546,26 @@ input::placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.forecast-button {
+  margin-top: 1vh;
+  background-color: #f0f0f0;
+  border: none;
+  padding: 1vh;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.forecast-button:hover {
+  background-color: #e0e0e0;
+}
+
+.forecast-container {
+  margin-top: 1vh;
+  background-color: #fafafa;
+  border-radius: 10px;
+  padding: 1vh;
 }
 
 .remove-button i {
