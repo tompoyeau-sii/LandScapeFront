@@ -1,4 +1,4 @@
-import NotificationService from "@/services/notificationService.js"; 
+import NotificationService from "@/services/alertService.js"; 
 const API_BASE_URL = 'http://localhost:8080/api';
 
 const apiService = {

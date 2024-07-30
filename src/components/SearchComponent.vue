@@ -15,11 +15,15 @@
           @click:append-inner="useCurrentLocation()"
         ></v-text-field> -->
             <i class="fas fa-map-marker-alt searchIcon"></i>
-            <input class="input-waypoint" v-model="from" placeholder="Départ" @focus="showFromList" />
+            <input
+              class="input-waypoint"
+              v-model="from"
+              placeholder="Départ"
+              @focus="showFromList"
+            />
             <button class="remove-button" @click.prevent="useCurrentLocation()">
               <i :class="{ fas: true, 'fa-crosshairs': true }"></i>
             </button>
-
           </div>
           <div v-if="meteoFrom">
             <p>Météo a la destination</p>
@@ -31,28 +35,50 @@
       </div>
 
       <!-- Étapes -->
-      <div v-for="(waypoint, index) in waypoints" :key="index" :class="{ dragging: dragIndex === index }">
+      <div
+        v-for="(waypoint, index) in waypoints"
+        :key="index"
+        :class="{ dragging: dragIndex === index }"
+      >
         <div class="waypoint">
           <div class="input-wrapper">
             <i class="far fa-regular fa-circle searchIcon"></i>
-            <input class="input-waypoint" v-model="waypoint.location" placeholder="Ajouter une étape"
-              @input="searchWaypointOptions(index)" />
-            <button class="remove-button" @click.prevent="removeWaypoint(index)">
-              <i :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"></i>
+            <input
+              class="input-waypoint"
+              v-model="waypoint.location"
+              placeholder="Ajouter une étape"
+              @input="searchWaypointOptions(index)"
+            />
+            <button
+              class="remove-button"
+              @click.prevent="removeWaypoint(index)"
+            >
+              <i
+                :class="{ 'fas fa-times': true, 'gray-cross': !hoverCross }"
+              ></i>
             </button>
           </div>
         </div>
         <div class="town-list" v-if="waypoint.options.length">
-          <p class="list-element" v-for="option in waypoint.options" :key="option.place_id"
-            @click="selectWaypointOption(index, option)">
+          <p
+            class="list-element"
+            v-for="option in waypoint.options"
+            :key="option.place_id"
+            @click="selectWaypointOption(index, option)"
+          >
             {{ option.display_name }}
           </p>
         </div>
       </div>
 
-
-      <v-btn v-if="from && to" @click="addWaypoint" color="blue" variant="tonal" prepend-icon="mdi-plus"
-        class="ma-3 text-none">
+      <v-btn
+        v-if="from && to"
+        @click="addWaypoint"
+        color="blue"
+        variant="tonal"
+        prepend-icon="mdi-plus"
+        class="ma-3 text-none"
+      >
         Ajouter une étape
       </v-btn>
 
@@ -64,15 +90,29 @@
         </div>
       </div>
       <div v-if="meteoTo">
-          <p>Météo à l'arrivée</p>
-          <p><span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C </p>
-          <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
-          <p>Temps : {{ meteoTo.weatherDescription }}</p>
-        </div>
-      <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
+        <p>Météo à l'arrivée</p>
+        <p>
+          <span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C
+        </p>
+        <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
+        <p>Temps : {{ meteoTo.weatherDescription }}</p>
+      </div>
+      <a class="stopSearch" v-if="from || to" @click="stopRoute">
+        Stopper la recherche
+      </a>
     </div>
-    <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
-    <town v-if="showToOptions" :searchOption="to" type="to" @option-selected="handleOptionSelected" />
+    <town
+      v-if="showFromOptions"
+      :searchOption="from"
+      type="from"
+      @option-selected="handleOptionSelected"
+    />
+    <town
+      v-if="showToOptions"
+      :searchOption="to"
+      type="to"
+      @option-selected="handleOptionSelected"
+    />
   </form>
 </template>
 
@@ -81,7 +121,7 @@
 import mapApiService from "@/services/mapApiService";
 import geolocationService from "@/services/geolocationService";
 import town from "./TownList.vue";
-import openMeteoService from '@/services/openMeteoService';
+import openMeteoService from "@/services/openMeteoService";
 
 export default {
   components: { town },
@@ -106,7 +146,7 @@ export default {
     async handleOptionSelected({ option, type }) {
       const latitude = parseFloat(option.lat);
       const longitude = parseFloat(option.lon);
-      
+
       if (type === "from") {
         this.from = option.display_name;
         this.showFromOptions = false;
@@ -126,7 +166,7 @@ export default {
     },
     async getWeather(lat, lon, meteoType) {
       try {
-        const date = new Date().toISOString().split('T')[0];
+        const date = new Date().toISOString().split("T")[0];
         const weatherData = await openMeteoService.getWeather(lat, lon, date);
         const now = new Date();
         let closestTimeIndex = 0;
@@ -148,48 +188,51 @@ export default {
         this[meteoType] = {
           temperature: weatherData.hourly.temperature_2m[closestTimeIndex],
           precipitation: weatherData.hourly.precipitation[closestTimeIndex],
-          weatherDescription: weatherDescription // Ajouter la description du temps
+          weatherDescription: weatherDescription, // Ajouter la description du temps
         };
 
         console.log(meteoType, this[meteoType]);
       } catch (error) {
-        console.error('Erreur lors de la récupération des données météo :', error);
+        console.error(
+          "Erreur lors de la récupération des données météo :",
+          error
+        );
       }
     },
     getWeatherDescription(weatherCode) {
       const weatherCodes = {
-        0: 'Ciel clair',
-        1: 'Principalement clair',
-        2: 'Partiellement nuageux',
-        3: 'Couvert',
-        45: 'Brouillard',
-        48: 'Dépôts de brouillard givrant',
-        51: 'Bruine légère',
-        53: 'Bruine modérée',
-        55: 'Bruine dense',
-        56: 'Bruine verglaçante légère',
-        57: 'Bruine verglaçante dense',
-        61: 'Pluie faible',
-        63: 'Pluie modérée',
-        65: 'Pluie forte',
-        66: 'Pluie verglaçante légère',
-        67: 'Pluie verglaçante forte',
-        71: 'Chute de neige légère',
-        73: 'Chute de neige modérée',
-        75: 'Chute de neige dense',
-        77: 'Grains de neige',
-        80: 'Averses de pluie faibles',
-        81: 'Averses de pluie modérées',
-        82: 'Averses de pluie violentes',
-        85: 'Averses de neige faibles',
-        86: 'Averses de neige fortes',
-        95: 'Orage',
-        96: 'Orage avec grêle légère',
-        99: 'Orage avec grêle forte',
+        0: "Ciel clair",
+        1: "Principalement clair",
+        2: "Partiellement nuageux",
+        3: "Couvert",
+        45: "Brouillard",
+        48: "Dépôts de brouillard givrant",
+        51: "Bruine légère",
+        53: "Bruine modérée",
+        55: "Bruine dense",
+        56: "Bruine verglaçante légère",
+        57: "Bruine verglaçante dense",
+        61: "Pluie faible",
+        63: "Pluie modérée",
+        65: "Pluie forte",
+        66: "Pluie verglaçante légère",
+        67: "Pluie verglaçante forte",
+        71: "Chute de neige légère",
+        73: "Chute de neige modérée",
+        75: "Chute de neige dense",
+        77: "Grains de neige",
+        80: "Averses de pluie faibles",
+        81: "Averses de pluie modérées",
+        82: "Averses de pluie violentes",
+        85: "Averses de neige faibles",
+        86: "Averses de neige fortes",
+        95: "Orage",
+        96: "Orage avec grêle légère",
+        99: "Orage avec grêle forte",
       };
 
-      return weatherCodes[weatherCode] || 'Code météo inconnu';
-  },
+      return weatherCodes[weatherCode] || "Code météo inconnu";
+    },
     async updateRoute() {
       try {
         let fromCoords;
@@ -258,7 +301,9 @@ export default {
         this.waypoints[index] = { ...waypoint, options };
       } catch (error) {
         console.error(
-          `Erreur lors de la récupération des suggestions pour l'étape ${index + 1} :`,
+          `Erreur lors de la récupération des suggestions pour l'étape ${
+            index + 1
+          } :`,
           error
         );
       }
@@ -278,8 +323,8 @@ export default {
       this.from = "";
       this.to = "";
       this.waypoints = [];
-      this.meteoFrom = null;  // Réinitialiser la météo de départ
-      this.meteoTo = null;    // Réinitialiser la météo d'arrivée
+      this.meteoFrom = null; // Réinitialiser la météo de départ
+      this.meteoTo = null; // Réinitialiser la météo d'arrivée
       this.$emit("stopRoute");
     },
     showFromList() {

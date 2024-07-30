@@ -16,6 +16,7 @@
         <div class="text-center">
           <div class="mb-5">
             <h2>Vos principaux centres d'intérêts</h2>
+            <p>(3 max)</p>
             <v-row>
               <v-col cols="12">
                 <v-chip
