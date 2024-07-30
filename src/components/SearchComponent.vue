@@ -27,9 +27,13 @@
           </div>
           <div v-if="meteoFrom">
             <p>Météo a la destination</p>
-            <p>Température : {{ meteoFrom.temperature }}°C</p>
+            <p> <span class="mdi mdi-thermometer"></span>{{ meteoFrom.temperature }}°C
+              <span :class="'mdi ' + getWeatherIcon(meteoFrom.weatherDescription)"></span>
+              {{ meteoFrom.weatherDescription }}
+              
+            </p>
             <!-- <p>Précipitations : {{ meteoFrom.precipitation }} mm</p> -->
-            <p>Temps : {{ meteoFrom.weatherDescription }}</p>
+           
           </div>
         </div>
       </div>
@@ -90,16 +94,13 @@
         </div>
       </div>
       <div v-if="meteoTo">
-        <p>Météo à l'arrivée</p>
-        <p>
-          <span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C
-        </p>
-        <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->
-        <p>Temps : {{ meteoTo.weatherDescription }}</p>
-      </div>
-      <a class="stopSearch" v-if="from || to" @click="stopRoute">
-        Stopper la recherche
-      </a>
+          <p>Météo à l'arrivée</p>
+          <p><span class="mdi mdi-thermometer"></span>{{ meteoTo.temperature }}°C   
+          <span :class="'mdi ' + getWeatherIcon(meteoTo.weatherDescription)"></span>
+            {{ meteoTo.weatherDescription }}</p>
+          <!-- <p><span class="mdi mdi-weather-pouring"></span> {{ meteoTo.precipitation }} mm</p> -->         
+        </div>
+      <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
     </div>
     <town
       v-if="showFromOptions"
@@ -143,6 +144,21 @@ export default {
     };
   },
   methods: {
+    getWeatherIcon(weatherDescription) {
+    const iconClasses = {
+      'Ensoleillé': 'mdi-white-balance-sunny',
+      'Nuageux': 'mdi-cloud-outline',
+      'Brouillard': 'mdi-weather-fog',
+      'Bruine': 'mdi-weather-rainy',
+      'Pluie': 'mdi-weather-pouring',
+      'Verglas': 'mdi-weather-snowy-rainy',
+      'Neige': 'mdi-weather-snowy',
+      'Orage': 'mdi-weather-lightning',
+      'Code météo inconnu': 'mdi-help-circle-outline'
+    };
+
+    return iconClasses[weatherDescription] || 'mdi-help-circle-outline';
+  },
     async handleOptionSelected({ option, type }) {
       const latitude = parseFloat(option.lat);
       const longitude = parseFloat(option.lon);
@@ -201,34 +217,34 @@ export default {
     },
     getWeatherDescription(weatherCode) {
       const weatherCodes = {
-        0: "Ciel clair",
-        1: "Principalement clair",
-        2: "Partiellement nuageux",
-        3: "Couvert",
-        45: "Brouillard",
-        48: "Dépôts de brouillard givrant",
-        51: "Bruine légère",
-        53: "Bruine modérée",
-        55: "Bruine dense",
-        56: "Bruine verglaçante légère",
-        57: "Bruine verglaçante dense",
-        61: "Pluie faible",
-        63: "Pluie modérée",
-        65: "Pluie forte",
-        66: "Pluie verglaçante légère",
-        67: "Pluie verglaçante forte",
-        71: "Chute de neige légère",
-        73: "Chute de neige modérée",
-        75: "Chute de neige dense",
-        77: "Grains de neige",
-        80: "Averses de pluie faibles",
-        81: "Averses de pluie modérées",
-        82: "Averses de pluie violentes",
-        85: "Averses de neige faibles",
-        86: "Averses de neige fortes",
-        95: "Orage",
-        96: "Orage avec grêle légère",
-        99: "Orage avec grêle forte",
+        0: 'Ensoleillé',
+        1: 'Ensoleillé',
+        2: 'Nuageux',
+        3: 'Nuageux',
+        45: 'Brouillard',
+        48: 'Brouillard',
+        51: 'Bruine',
+        53: 'Bruine',
+        55: 'Bruine',
+        56: 'Bruine',
+        57: 'Bruine',
+        61: 'Pluie',
+        63: 'Pluie',
+        65: 'Pluie',
+        66: 'Verglas',
+        67: 'Verglas',
+        71: 'Neige',
+        73: 'Neige',
+        75: 'Neige',
+        77: 'Neige',
+        80: 'Pluie',
+        81: 'Pluie',
+        82: 'Pluie',
+        85: 'Pluie',
+        86: 'Pluie',
+        95: 'Orage',
+        96: 'Orage',
+        99: 'Orage',
       };
 
       return weatherCodes[weatherCode] || "Code météo inconnu";
