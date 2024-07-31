@@ -5,46 +5,10 @@
       <div class="waypoint">
         <div class="input-wrapper">
           <i class="fas fa-map-marker-alt searchIcon"></i>
-          <input
-            class="input-waypoint"
-            v-model="from"
-            placeholder="Départ"
-            @focus="showFromList"
-          />
+          <input class="input-waypoint" v-model="from" placeholder="Départ" @focus="showFromList" />
           <button class="remove-button" @click.prevent="useCurrentLocation()">
             <i class="fas fa-crosshairs"></i>
           </button>
-        </div>
-        <div v-if="from">
-          <v-btn @click="dialogMeteoFrom = true" class="weather-button" icon>
-            <span class="mdi mdi-weather-partly-cloudy"></span>
-          </v-btn>
-
-          <v-dialog v-model="dialogMeteoFrom" max-width="600px">
-            <v-card>
-              <v-card-title>
-                <span class="headline">Météo au départ</span>
-              </v-card-title>
-              <v-card-text>
-                <div v-if="meteoFrom">
-                  <div class="forecast-container">
-                    <div class="forecast-column" v-for="(forecast, index) in next5HoursForecastFrom" :key="index">
-                      <div class="forecast-time">{{ forecast.time }}</div>
-                      <div class="forecast-icon">
-                        <span :class="'mdi ' + getWeatherIcon(forecast.weatherDescription)"></span>
-                      </div>
-                      <div class="forecast-temperature">{{ forecast.temperature }}°C</div>
-                      <div class="forecast-precipitation">{{ forecast.precipitation }} mm</div>
-                    </div>
-                  </div>
-                </div>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" text @click="dialogMeteoFrom = false">Fermer</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </div>
       </div>
 
@@ -73,46 +37,65 @@
         Ajouter une étape
       </v-btn>
 
-      <v-dialog v-model="dialogMeteoTo" max-width="600px">
-        <v-card>
-          <v-card-title>
-            <span class="headline">Météo à l'arrivée</span>
-          </v-card-title>
-          <v-card-text>
-            <div v-if="meteoTo">
-              <div class="forecast-container">
-                <div class="forecast-column" v-for="(forecast, index) in next5HoursForecast" :key="index">
-                  <div class="forecast-time">{{ forecast.time }}</div>
-                  <div class="forecast-icon">
-                    <span :class="'mdi ' + getWeatherIcon(forecast.weatherDescription)"></span>
-                  </div>
-                  <div class="forecast-temperature">{{ forecast.temperature }}°C</div>
-                  <div class="forecast-precipitation">{{ forecast.precipitation }} mm</div>
-                </div>
-              </div>
-            </div>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialogMeteoTo = false">Fermer</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
       <!-- Destination -->
       <div>
         <div class="input-wrapper">
           <i class="fas fa-flag-checkered searchIcon"></i>
-          <input  class="input-waypoint" v-model="to" placeholder="Destination" @focus="showToList" />
+          <input class="input-waypoint" v-model="to" placeholder="Destination" @focus="showToList" />
         </div>
       </div>
-      <div v-if="meteoTo">
-        <v-btn @click="dialogMeteoTo = true" class="weather-button" icon>
-          <span class="mdi mdi-weather-partly-cloudy"></span>
+
+      <!-- Nouveau bouton unique pour afficher le dialogue météo -->
+      <div v-if="meteoFrom || meteoTo">
+        <v-btn @click="dialogMeteo = true">
+          Météo <span class="mdi mdi-weather-partly-rainy"></span>
         </v-btn>
       </div>
+
       <a class="stopSearch" v-if="from && to" @click="stopRoute"> Stopper la recherche </a>
     </div>
+
+    <v-dialog v-model="dialogMeteo" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Météo</span>
+        </v-card-title>
+        <v-card-text>
+          <div v-if="meteoFrom">
+            <h3 class="centered-title">Départ</h3>
+            <div class="forecast-container">
+              <div class="forecast-column" v-for="(forecast, index) in next5HoursForecastFrom" :key="index">
+                <div class="forecast-time">{{ forecast.time }}</div>
+                <div class="forecast-icon">
+                  <span :class="'mdi ' + getWeatherIcon(forecast.weatherDescription)"></span>
+                </div>
+                <div class="forecast-temperature">{{ forecast.temperature }}°C</div>
+                <div class="forecast-precipitation">{{ forecast.precipitation }} mm</div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="meteoTo" style="margin-top: 20px;">
+            <h3 class="centered-title">Arrivée</h3>
+            <div class="forecast-container">
+              <div class="forecast-column" v-for="(forecast, index) in next5HoursForecast" :key="index">
+                <div class="forecast-time">{{ forecast.time }}</div>
+                <div class="forecast-icon">
+                  <span :class="'mdi ' + getWeatherIcon(forecast.weatherDescription)"></span>
+                </div>
+                <div class="forecast-temperature">{{ forecast.temperature }}°C</div>
+                <div class="forecast-precipitation">{{ forecast.precipitation }} mm</div>
+              </div>
+            </div>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="dialogMeteo = false">Fermer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <town v-if="showFromOptions" :searchOption="from" type="from" @option-selected="handleOptionSelected" />
     <town v-if="showToOptions" :searchOption="to" type="to" @option-selected="handleOptionSelected" />
   </form>
@@ -130,8 +113,7 @@ export default {
   data() {
     return {
       from: "",
-      dialogMeteoFrom: false,
-      dialogMeteoTo: false,
+      dialogMeteo: false,
       to: "",
       waypoints: [],
       route: [],
@@ -596,5 +578,9 @@ input::placeholder {
 .forecast-temperature,
 .forecast-precipitation {
   margin-bottom: 5px;
+}
+
+.centered-title {
+  text-align: center;
 }
 </style>
