@@ -72,6 +72,6 @@ h3 {
   border-radius: 15px;
   background-color: white;
   align-items: stretch;
-  width: 17%;
+  width: 20%;
 }
 </style>

@@ -5,8 +5,8 @@
     </v-btn>
 
     <v-dialog v-model="dialog" max-width="500">
-      <v-card class="mx-auto pa-12 pb-3" elevation="8" width="480" rounded="lg">
-        <h2 class="pb-4 text-center">On se connait ?</h2>
+      <v-card class="mx-auto pa-12 pb-3 text-center" elevation="8" width="480" rounded="lg">
+        <img class="w-75 landscape" src="@/assets/img/landscape.png">
         <v-form ref="form" v-model="valid" @submit.prevent="handleLogin">
           <v-text-field
             v-model="email"
@@ -111,5 +111,9 @@ export default {
 .connexion-button {
   color: white;
   background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
+}
+
+.landscape {
+  margin: auto;
 }
 </style>

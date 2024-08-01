@@ -23,7 +23,7 @@ export default {
     route: {
       type: Array,
       required: true,
-    },
+    }
   },
   components: {
     NotificationList,

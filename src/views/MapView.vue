@@ -48,7 +48,7 @@ export default {
       endMarker: null,
       selectedPoi: null,
       routeDistance: "0",
-      routeTime: "0",
+      routeTime: "0"
     };
   },
   computed: {
@@ -101,10 +101,11 @@ export default {
 
     showRoute(route) {
       this.removeMarkers();
+
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
       }
-      this.route = route.coordinates
+      this.route = route.coordinates;
       this.routeControl = createRouteControl(this.map, route);
 
       this.routeControl.on("routesfound", (e) => {
@@ -112,7 +113,6 @@ export default {
         var summary = routes[0].summary;
         this.routeDistance = (summary.totalDistance / 1000).toFixed(0);
         this.routeTime = (summary.totalTime / 60).toFixed(2);
-        console.log(this.routeControl)
 
         this.$emit("update:distance", this.routeDistance);
         this.$emit("update:time", this.routeTime);
@@ -133,11 +133,13 @@ export default {
     },
 
     stopRoute() {
+      this.poiList = null;
+      this.removeMarkers()
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
         this.routeDistance = 0;
         this.routeTime = 0;
-        this.poiList = null;
+        this.route = null;
 
         this.$emit("update:distance", this.routeDistance);
         this.$emit("update:time", this.formattedRouteTime);
