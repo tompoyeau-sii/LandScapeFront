@@ -7,7 +7,7 @@
           @click="retourPagePrecedente"
           icon="mdi-arrow-left"
         ></v-btn>
-        <h1 class="title">WecanScape</h1>
+        <h1 class="title">LandS'Cap</h1>
       </div>
       <div class="content">
         <transition name="slide-fade">
@@ -104,7 +104,7 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="company.address"
+                    v-model="company.siegeSocial"
                     :rules="[rules.required]"
                     label="Siège social"
                     variant="solo-filled"
@@ -158,7 +158,7 @@ export default {
       },
       company: {
         name: "",
-        address: "",
+        siegeSocial: "",
         siret: "",
       },
       isAELChecked: false,
@@ -175,6 +175,8 @@ export default {
     async handleSubmit() {
       if (this.$refs.form.validate()) {
         if (this.isAELChecked) {
+          this.submit()
+          console.log("Formulaire phase 1:", this.user);
           this.step = 2; // Passer à la deuxième partie du formulaire
         } else {
           await this.submit();
@@ -183,6 +185,7 @@ export default {
     },
     async submit() {
       if (this.$refs.form.validate()) {
+        console.log("le submit?")
         try {
           const userCredential = await createUserWithEmailAndPassword(
             auth,
@@ -210,9 +213,7 @@ export default {
             uId: user.uid,
             right: { id: rightId },
           };
-
           await apiService.post("/users", userData);
-
           if (this.isAELChecked) {
             // Attendre que la deuxième partie du formulaire soit validée
             this.step = 2;
@@ -220,19 +221,22 @@ export default {
             // Redirection ou autre logique après inscription réussie
             console.log("Utilisateur inscrit et connecté:", this.user);
           }
+          
         } catch (err) {
           console.error("Erreur d'inscription:", err);
         }
       }
     },
-    async submitCompany() {
+    async submitCompany(user) {
+      this.id = await apiService.get("/users/", user.uid)
+      console.log(this.id);
       if (this.$refs.form.validate()) {
         try {
           const companyData = {
-            name: this.company.name,
-            address: this.company.address,
+            nom: this.company.name,
+            siegeSocial: this.company.siegeSocial,
             siret: this.company.siret,
-            userUid: this.user.uid, // Associer l'entreprise à l'utilisateur
+            user: this.user.uid, // Associer l'entreprise à l'utilisateur
           };
 
           await apiService.post("/entreprises", companyData);
