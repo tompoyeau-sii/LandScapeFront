@@ -1,41 +1,31 @@
 <template>
   <div class="container pb-3 pl-3 pr-3">
     <h3 class="mt-3">Activités</h3>
-    <!-- <ul>
-      <li
-        class="poi pa-2 rounded-lg"
+    <v-expansion-panels>
+      <v-expansion-panel
         v-for="poi in filteredPoiList"
         :key="poi.id"
         @click="selectPoi(poi)"
       >
-        <span class="poi-name">{{ poi.tags.name }}</span>
-        <span class="poi-rating">
-          {{ getRandomRating(poi.id) }}
-          <v-icon class="rating-icon" icon="mdi-star"></v-icon>
-        </span>
-      </li> -->
-      <v-expansion-panels>
-        <v-expansion-panel
-          
-          v-for="poi in filteredPoiList"
-          :key="poi.id"
-          @click="selectPoi(poi)"
-        >
-          <v-expansion-panel-title>
-            <span class="poi-name">{{ poi.tags.name }}</span>
+        <v-expansion-panel-title>
+          <div class="title-container">
+            <div class="name-tag">
+              <span>{{ poi.tags.name }}</span>
+              <span class="tag">{{ poi.tags.tourism }}</span>
+            </div>
             <span class="poi-rating">
               {{ getRandomRating(poi.id) }}
               <v-icon class="rating-icon" icon="mdi-star"></v-icon>
             </span>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <a>Définir comme destination</a>
-            <br>
-            <a>Ajouter cette étape</a>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-    <!-- </ul> -->
+          </div>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <a>Définir comme destination</a>
+          <br />
+          <a>Ajouter cette étape</a>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 
@@ -98,11 +88,19 @@ h3 {
 }
 
 .poi {
-  box-shadow: none!important;
+  box-shadow: none !important;
 }
 
-.poi-name {
-  flex-grow: 1; /* Laisser le nom du POI prendre tout l'espace disponible */
+.title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.name-tag {
+  display: flex;
+  flex-direction: column;
 }
 
 .poi-rating {
@@ -111,12 +109,18 @@ h3 {
 }
 
 .rating-icon {
-  margin-left: 0.25rem; /* Ajoute un peu d'espace entre la note et l'icône */
+  margin-left: 0.25rem;
   color: orange;
 }
 
 .poi:hover {
   background-color: whitesmoke;
+}
+
+.tag {
+  font-size: small;
+  font-style: italic;
+  padding-top: 1vh;
 }
 
 .container {

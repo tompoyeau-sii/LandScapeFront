@@ -442,39 +442,51 @@ export default {
   flex-direction: column;
 }
 
-.input-wrapper {
+.input-container .input-wrapper {
   display: flex;
   align-items: center;
-  position: relative;
   border-radius: 10px;
   background-color: #f0f0f0;
   padding: 1vh;
   margin: 1vh;
-  justify-content: flex-start;
+  overflow-x: auto;
+  position: relative;
+  margin-bottom: 1rem;
 }
 
-.searchIcon {
+.input-container .input-wrapper .searchIcon {
   color: #b4b4b4;
 }
 
-.input-waypoint {
+.input-container .input-wrapper .input-waypoint {
   flex: 1;
   padding-right: 2em;
-}
-
-input {
   border: none;
   padding: 5px;
   font-size: large;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
   transition: width 0.3s;
   background-color: transparent;
   outline: none;
 }
 
-input::placeholder {
+.input-container .input-wrapper::placeholder {
   color: #424242;
+}
+.input-container .input-wrapper .remove-button {
+  right: 0.5em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.input-container .input-wrapper .remove-button:hover {
+  background-color: #f0f0f0;
+}
+
+.input-container .input-wrapper .remove-button i {
+  pointer-events: none;
 }
 
 .stopSearch {
@@ -512,16 +524,6 @@ input::placeholder {
   background-color: black;
 }
 
-.remove-button {
-  position: absolute;
-  right: 0.5em;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .forecast-container {
   margin-top: 1vh;
@@ -530,39 +532,9 @@ input::placeholder {
   padding: 1vh;
 }
 
-.remove-button i {
-  pointer-events: none;
-}
-
-.remove-button:hover {
-  background-color: #f0f0f0;
-}
-.input-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.input-wrapper {
-  position: relative;
-  margin-bottom: 1rem;
-}
-
-.searchIcon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-}
 
 .input-waypoint {
   padding-left: 40px;
-}
-
-.remove-button {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
 }
 
 .weather-button {

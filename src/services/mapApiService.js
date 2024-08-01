@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = 'https://nominatim.openstreetmap.org/';
 
-const apiService = {
+const mapApiService = {
     // Permet de rechercher une localisation avec une adresse
     async searchLocation(query) {
         try {
@@ -63,4 +63,4 @@ const apiService = {
     }
 };
 
-export default apiService;
+export default mapApiService;

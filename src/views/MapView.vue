@@ -9,11 +9,7 @@
     ></overlay>
     <panel></panel>
   </div>
-  <PoiList
-    v-if="poiList"
-    :poiList="poiList"
-    @poi-selected="handlePoiSelected"
-  ></PoiList>
+  <PoiList v-if="poiList" :poiList="poiList" @poi-selected="handlePoiSelected"></PoiList>
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
@@ -32,9 +28,9 @@ import PoiList from "@/components/PoiListComponent.vue";
 import { mapState } from "vuex";
 import {
   createMarker,
-  createPoiMarker,
   createRouteControl,
   fitMapToBounds,
+  createPoiMarker
 } from "@/utils/mapUtils";
 import Panel from "@/components/PanelComponent.vue";
 
@@ -43,16 +39,17 @@ export default {
   components: {
     Overlay,
     Panel,
-    PoiList,
+    PoiList
   },
   data() {
     return {
       map: null,
       routeControl: null,
+      point: null,
       poiList: null,
       startMarker: null,
       endMarker: null,
-      poiMarkers: [], // Tableau pour stocker les marqueurs de POI
+      selectedPoi: null,
       routeDistance: "0",
       routeTime: "0",
     };
@@ -66,12 +63,13 @@ export default {
   methods: {
     initializeMap() {
       this.map = L.map("map", {
-        zoomControl: false,
-      }).setView([48.0061, 0.1996], 8);
+        zoomControl: true,
+      }).setView([48.85889, 2.32003], 8);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 20,
       }).addTo(this.map);
+      console.log(this.map)
     },
 
     zoomToLocation(lat, lng) {
@@ -79,19 +77,19 @@ export default {
     },
 
     handleLocationSelected(location) {
+      this.point = location;
       this.zoomToLocation(location.lat, location.lng);
 
       poiService
         .getPOI(location.lat, location.lng)
         .then((data) => {
-          console.log("Points d'intérêt:", data);
           this.poiList = data;
         })
         .catch((error) => {
           console.error("Erreur:", error);
         });
 
-      this.startMarker = this.updateMarker(this.startMarker, location);
+      this.startMarker = this.updateMarker(this.startMarker, location, true);
     },
 
     updateMarker(marker, location) {
@@ -99,10 +97,9 @@ export default {
       return createMarker(this.map, location);
     },
 
-    updatePoiMarker(location) {
-      const marker = createPoiMarker(this.map, location);
-      this.poiMarkers.push(marker); // Ajouter le marqueur au tableau poiMarkers
-      return marker;
+    updatePoiMarker(marker, location) {
+      if (marker) this.map.removeLayer(marker);
+      return createPoiMarker(this.map, location);
     },
 
     showRoute(route) {
@@ -118,6 +115,7 @@ export default {
         var summary = routes[0].summary;
         this.routeDistance = (summary.totalDistance / 1000).toFixed(0);
         this.routeTime = (summary.totalTime / 60).toFixed(2);
+        console.log(this.routeControl)
 
         this.$emit("update:distance", this.routeDistance);
         this.$emit("update:time", this.routeTime);
@@ -135,30 +133,34 @@ export default {
         this.map.removeLayer(this.endMarker);
         this.endMarker = null;
       }
-      this.poiMarkers.forEach(marker => {
-        this.map.removeLayer(marker);
-      });
-      this.poiMarkers = []; // Réinitialiser le tableau des marqueurs de POI
     },
 
     stopRoute() {
-      this.poiList = null;
-      this.removeMarkers();
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
-      }
-      this.routeDistance = 0;
-      this.routeTime = 0;
+        this.routeDistance = 0;
+        this.routeTime = 0;
+        this.poiList = null;
 
-      this.$emit("update:distance", this.routeDistance);
-      this.$emit("update:time", this.routeTime);
+        this.$emit("update:distance", this.routeDistance);
+        this.$emit("update:time", this.formattedRouteTime);
+      }
     },
 
     handlePoiSelected(poi) {
-      const location = { lat: poi.lat, lng: poi.lon };
-      this.updatePoiMarker(location);
-      this.zoomToLocation(location.lat, location.lng);
-    },
+      if (this.selectedPoi && this.selectedPoi.id === poi.id) {
+        // Si le POI sélectionné est le même que le précédent, on supprime le marqueur
+        this.map.removeLayer(this.endMarker);
+        this.endMarker = null;
+        this.selectedPoi = null;
+      } else {
+        // Sinon, on met à jour le marqueur à la nouvelle position
+        const location = { lat: poi.lat, lng: poi.lon };
+        this.endMarker = this.updatePoiMarker(this.endMarker, location);
+        this.zoomToLocation(location.lat, location.lng);
+        this.selectedPoi = poi;
+      }
+    }
   },
 };
 </script>
@@ -185,6 +187,7 @@ export default {
   background-color: white;
   z-index: 2;
   width: 17%;
+  max-height: 45%;
 }
 
 html {
