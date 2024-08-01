@@ -124,9 +124,9 @@ export default {
       showToOptions: false,
       meteoFrom: null,
       meteoTo: null,
-      showForecast: false,
+     
       next5HoursForecast: [],
-      showForecastFrom: false,
+      
       next5HoursForecastFrom: []
     };
   },
@@ -147,13 +147,7 @@ export default {
       return iconClasses[weatherDescription] || 'mdi-help-circle-outline';
     },
 
-    toggleForecastVisibility() {
-      this.showForecast = !this.showForecast;
-    },
-
-    toggleForecastFromVisibility() {
-      this.showForecastFrom = !this.showForecastFrom;
-    },
+   
 
     async handleOptionSelected({ option, type }) {
       const latitude = parseFloat(option.lat);
@@ -292,6 +286,7 @@ export default {
             this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
           }
         }
+        console.log(this.route)
 
         this.$emit("selectRoute", this.route);
       } catch (error) {
