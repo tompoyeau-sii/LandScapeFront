@@ -10,74 +10,126 @@
         <h1 class="title">WecanScape</h1>
       </div>
       <div class="content">
-        <v-form class="text-center" ref="form" v-model="valid" lazy-validation>
-          <div class="mb-5">
-            <h2>On se connait pas encore ?</h2>
-            <h3>Remédions à ça !</h3>
-          </div>
-          <v-row>
-            <v-col cols="12" lg="6">
-              <v-text-field
-                v-model="user.firstName"
-                :rules="[rules.required]"
-                label="Prénom"
-                variant="solo-filled"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" lg="6">
-              <v-text-field
-                v-model="user.lastName"
-                :rules="[rules.required]"
-                label="Nom"
-                variant="solo-filled"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="user.birthDate"
-                :rules="[rules.required]"
-                label="Date de naissance"
-                type="date"
-                variant="solo-filled"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-checkbox
-                v-model="isAELChecked"
-                label="AEL"
-              ></v-checkbox>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="user.email"
-                :rules="[rules.required, rules.email]"
-                label="E-mail"
-                variant="solo-filled"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                v-model="user.password"
-                :rules="[rules.required]"
-                label="Mot de passe"
-                type="password"
-                variant="solo-filled"
-                required
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-btn
-            class="mt-5 register-button"
-            :disabled="!valid"
-            color="blue"
-            @click="submit"
-            >En route !</v-btn
+        <transition name="slide-fade">
+          <v-form
+            class="text-center"
+            ref="form"
+            v-model="valid"
+            lazy-validation
+            :key="step"
           >
-        </v-form>
+            <!-- Partie 1: Informations utilisateur -->
+            <div v-if="step === 1">
+              <div class="mb-5">
+                <h2>On se connait pas encore ?</h2>
+                <h3>Remédions à ça !</h3>
+              </div>
+              <v-row>
+                <v-col cols="12" lg="6">
+                  <v-text-field
+                    v-model="user.firstName"
+                    :rules="[rules.required]"
+                    label="Prénom"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" lg="6">
+                  <v-text-field
+                    v-model="user.lastName"
+                    :rules="[rules.required]"
+                    label="Nom"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="user.birthDate"
+                    :rules="[rules.required]"
+                    label="Date de naissance"
+                    type="date"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  <v-checkbox
+                    v-model="isAELChecked"
+                    label="AEL"
+                  ></v-checkbox>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="user.email"
+                    :rules="[rules.required, rules.email]"
+                    label="E-mail"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="user.password"
+                    :rules="[rules.required]"
+                    label="Mot de passe"
+                    type="password"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-btn
+                class="mt-5 register-button"
+                :disabled="!valid"
+                color="blue"
+                @click="handleSubmit"
+              >En route !</v-btn>
+            </div>
+
+            <!-- Partie 2: Informations entreprise -->
+            <div v-if="step === 2">
+              <div class="mb-5">
+                <h2>Informations sur l'entreprise</h2>
+              </div>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="company.name"
+                    :rules="[rules.required]"
+                    label="Nom de l'entreprise"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="company.address"
+                    :rules="[rules.required]"
+                    label="Siège social"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="company.siret"
+                    :rules="[rules.required]"
+                    label="SIRET"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-btn
+                class="mt-5 register-button"
+                :disabled="!valid"
+                color="blue"
+                @click="submitCompany"
+              >Soumettre</v-btn>
+            </div>
+          </v-form>
+        </transition>
         <img
           class="img-form"
           src="@/assets/img/form.png"
@@ -87,7 +139,6 @@
     </v-card>
   </div>
 </template>
-
 <script>
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../plugins/firebaseConfig";
@@ -97,6 +148,7 @@ export default {
   data() {
     return {
       valid: false,
+      step: 1, // Nouvelle propriété pour gérer la partie du formulaire visible
       user: {
         firstName: "",
         lastName: "",
@@ -104,7 +156,12 @@ export default {
         email: "",
         password: "",
       },
-      isAELChecked: false, // Propriété pour la case à cocher AEL
+      company: {
+        name: "",
+        address: "",
+        siret: "",
+      },
+      isAELChecked: false,
       rules: {
         required: (value) => !!value || "Ce champ est requis.",
         email: (value) => {
@@ -115,6 +172,15 @@ export default {
     };
   },
   methods: {
+    async handleSubmit() {
+      if (this.$refs.form.validate()) {
+        if (this.isAELChecked) {
+          this.step = 2; // Passer à la deuxième partie du formulaire
+        } else {
+          await this.submit();
+        }
+      }
+    },
     async submit() {
       if (this.$refs.form.validate()) {
         try {
@@ -135,7 +201,7 @@ export default {
 
           // Détermination de l'id du droit
           const rightId = this.isAELChecked ? 3 : 1;
-console.log(rightId)
+
           // Envoyer les données utilisateur à l'API Java Spring Boot
           const userData = {
             name: this.user.lastName,
@@ -147,10 +213,34 @@ console.log(rightId)
 
           await apiService.post("/users", userData);
 
-          // Redirection ou autre logique après inscription réussie
-          console.log("Utilisateur inscrit et connecté:", this.user);
+          if (this.isAELChecked) {
+            // Attendre que la deuxième partie du formulaire soit validée
+            this.step = 2;
+          } else {
+            // Redirection ou autre logique après inscription réussie
+            console.log("Utilisateur inscrit et connecté:", this.user);
+          }
         } catch (err) {
           console.error("Erreur d'inscription:", err);
+        }
+      }
+    },
+    async submitCompany() {
+      if (this.$refs.form.validate()) {
+        try {
+          const companyData = {
+            name: this.company.name,
+            address: this.company.address,
+            siret: this.company.siret,
+            userUid: this.user.uid, // Associer l'entreprise à l'utilisateur
+          };
+
+          await apiService.post("/entreprises", companyData);
+
+          // Redirection ou autre logique après l'inscription de l'entreprise
+          console.log("Entreprise ajoutée:", companyData);
+        } catch (err) {
+          console.error("Erreur d'ajout de l'entreprise:", err);
         }
       }
     },
@@ -162,8 +252,17 @@ console.log(rightId)
 </script>
 
 <style scoped>
-html {
-  overflow-y: hidden;
+/* Définir la transition pour le changement de partie du formulaire */
+.slide-fade-enter-active, .slide-fade-leave-active {
+  transition: opacity 0.5s, transform 0.5s;
+}
+.slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active dans <2.1.8 */ {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+body {
+  overflow: hidden;
 }
 
 .body {
@@ -184,6 +283,7 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .head {

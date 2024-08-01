@@ -1,13 +1,8 @@
 <template>
   <div class="header">
-    <overlay
-      @stopRoute="stopRoute"
-      @selectRoute="showRoute"
-      @locationSelected="handleLocationSelected"
-      :distance="routeDistance"
-      :time="routeTime"
-    ></overlay>
-    <panel></panel>
+    <overlay @stopRoute="stopRoute" @selectRoute="showRoute" @locationSelected="handleLocationSelected"
+      :distance="routeDistance" :time="routeTime"></overlay>
+    <panel :route="route"></panel>
   </div>
   <PoiList v-if="poiList" :poiList="poiList" @poi-selected="handlePoiSelected"></PoiList>
   <div>
@@ -25,6 +20,7 @@ import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import poiService from "@/services/poiService";
 import Overlay from "@/components/OverlayComponent.vue";
 import PoiList from "@/components/PoiListComponent.vue";
+
 import { mapState } from "vuex";
 import {
   createMarker,
@@ -44,6 +40,7 @@ export default {
   data() {
     return {
       map: null,
+      route: null,
       routeControl: null,
       point: null,
       poiList: null,
@@ -107,7 +104,7 @@ export default {
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
       }
-
+      this.route = route.coordinates
       this.routeControl = createRouteControl(this.map, route);
 
       this.routeControl.on("routesfound", (e) => {
