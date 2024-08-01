@@ -7,7 +7,7 @@
           @click="retourPagePrecedente"
           icon="mdi-arrow-left"
         ></v-btn>
-        <h1 class="title">WecanScape</h1>
+        <h1 class="title">LandS'Cap</h1>
       </div>
       <div class="content">
         <transition name="slide-fade">
