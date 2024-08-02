@@ -21,7 +21,9 @@
       <div
         v-for="(waypoint, index) in waypoints"
         :key="index"
+        @mousedown="startDrag($event, index)"
         :class="{ dragging: dragIndex === index }"
+        class="waypoint-wrapper"
       >
         <div class="waypoint">
           <div class="input-wrapper">
@@ -30,8 +32,9 @@
               class="input-waypoint"
               v-model="waypoint.location"
               placeholder="Ajouter une étape"
-              @input="searchWaypointOptions(index)"
+              @input="debouncedSearchWaypointOptions(index)"
             />
+
             <button
               class="remove-button"
               @click.prevent="removeWaypoint(index)"
@@ -107,6 +110,7 @@
 import mapApiService from "@/services/mapApiService";
 import geolocationService from "@/services/geolocationService";
 import town from "./TownList.vue";
+import { debounce } from "lodash"; // Importation de lodash
 
 export default {
   components: { town },
@@ -197,7 +201,7 @@ export default {
           lon: lng.toString(),
           display_name: locationData.city,
         };
-        this.handleOptionSelected({ option, type: "from" })
+        this.handleOptionSelected({ option, type: "from" });
         this.from = locationData.city;
         this.updateRoute();
       } catch (error) {
@@ -297,6 +301,12 @@ export default {
       document.removeEventListener("mouseup", this.endDrag);
       this.updateRoute();
     },
+  },
+  created() {
+    this.debouncedSearchWaypointOptions = debounce(
+      this.searchWaypointOptions,
+      500
+    );
   },
 };
 </script>

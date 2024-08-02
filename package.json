@@ -19,7 +19,8 @@
     "vue-leaflet": "^0.1.0",
     "vue-router": "^4.4.0",
     "vuetify": "^3.6.10",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "WecanScape": "file:"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

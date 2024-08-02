@@ -47,7 +47,7 @@
       >
         <div
           style="display: flex; flex-direction: column; height: 100%"
-          class="pa-12 mx-auto"
+          class="pa-3 mx-auto"
         >
           <div class="scrollable-categories">
             <div
