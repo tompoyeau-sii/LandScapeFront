@@ -17,11 +17,13 @@
         </div>
       </div>
 
-      <!-- Étapes -->
+       <!-- Étapes -->
       <div
         v-for="(waypoint, index) in waypoints"
         :key="index"
+        @mousedown="startDrag($event, index)"
         :class="{ dragging: dragIndex === index }"
+        class="waypoint-wrapper"
       >
         <div class="waypoint">
           <div class="input-wrapper">
