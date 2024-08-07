@@ -222,10 +222,11 @@ export default {
             right: { id: rightId },
           };
           this.userUid = user.uid;
-          await apiService.post("/users", userData);
+         
           if (this.isAELChecked) {
             this.step = 2;
           } else {
+            await apiService.post("/users", userData);
             console.log("Utilisateur inscrit et connecté:", this.user);
           }
           
