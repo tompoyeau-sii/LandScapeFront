@@ -269,14 +269,14 @@ export default {
           uId: user.uid,
           right: { id: rightId },
         },
-        entreprise: {
-          nom: this.company.name,
-          siegeSocial: this.company.siegeSocial,
+        company: {
+        name: this.company.name,
+          headOffice: this.company.siegeSocial,
           siret: this.company.siret,
         },
       };
-
-      await apiService.post("/entreprises/createWithUser", companyData);
+      
+      apiService.post("/companies/createWithUser", companyData);
 
       console.log("Entreprise ajoutée avec l'utilisateur:", companyData);
       this.$router.push({ path: '/' });
