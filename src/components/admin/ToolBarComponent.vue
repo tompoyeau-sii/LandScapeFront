@@ -10,8 +10,8 @@
         <v-divider></v-divider>
 
         <v-list density="compact" nav>
-          <v-list-item @click="navigateTo('')" prepend-icon="mdi-account-group" title="Utilisateurs"></v-list-item>
-          <v-list-item @click="navigateTo('hobby')" prepend-icon="mdi-drama-masks" title="Hobbies"></v-list-item>
+          <v-list-item @click="navigateTo('users')" prepend-icon="mdi-account-group" title="Utilisateurs"></v-list-item>
+          <v-list-item @click="navigateTo('hobbies')" prepend-icon="mdi-drama-masks" title="Hobbies"></v-list-item>
         </v-list>
       </v-navigation-drawer>
     </v-layout>

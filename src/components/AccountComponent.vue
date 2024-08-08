@@ -43,7 +43,7 @@ export default {
       this.$router.push({ name: "AccountView" });
     },
     goToAdministration() {
-      this.$router.push({ name: "AdministrationView" });
+      this.$router.push("/administration/users");
     },
     async handleLogout() {
       await this.logout();

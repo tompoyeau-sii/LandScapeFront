@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1>Liste des hobbies</h1>
+    <div class="title-bar">
+      <h1>Liste des hobbies</h1>
+      <v-btn color="primary" @click="showModal = true">Ajouter un hobby</v-btn>
+    </div>
     <v-card flat>
       <template v-slot:text>
         <v-text-field
@@ -18,7 +21,6 @@
         :search="search"
       >
       </v-data-table>
-      <v-btn color="primary" @click="showModal = true">Ajouter un hobby</v-btn>
     </v-card>
 
     <v-dialog v-model="showModal" max-width="500px">
@@ -65,7 +67,7 @@ export default {
       categories: [],
       headers: [
         { title: "Libellé", align: "start", key: "label" },
-        { title: "Categorie", align: "start", key: "categoryLabel" },
+        { title: "Catégories", align: "start", key: "categoryLabel" },
       ],
       showModal: false,
       newHobby: {
@@ -114,5 +116,10 @@ export default {
 
 
 <style>
-
+.title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>
+

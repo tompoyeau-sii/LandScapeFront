@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import { getAuth } from 'firebase/auth'; // Importation de l'authentification Firebase
 import ListUsersComponent from '@/components/admin/ListUsersComponent.vue';
+import store from '@/store'; // Assurez-vous que le store Vuex est correctement importé
 import HobbyComponent from '@/components/admin/HobbyComponent.vue';
 
 const routes = [
@@ -18,27 +19,27 @@ const routes = [
         path: '/profil',
         name: 'AccountView',
         component: () => import('../views/AccountView.vue'),
-        meta: { requiresAuth: true } // Ajout d'un meta field pour indiquer que l'authentification est requise
+        meta: { requiresAuth: true }
     },
     {
         path: '/administration',
         name: 'AdministrationView',
         component: () => import('../views/AdministrationView.vue'),
-        meta: { requiresAuth: true }, // Ajout d'un meta field pour indiquer que l'authentification est requise
+        meta: { requiresAuth: true, requiresAdmin: true },
         children: [
             {
-                path: '',
+                path: 'users',
+                name: 'ListUsers',
                 component: ListUsersComponent
             },
             {
-                path: 'hobby',
+                path: 'hobbies',
+                name: 'Hobby',
                 component: HobbyComponent
             }
         ]
     }
-
 ];
-
 
 const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
@@ -46,17 +47,22 @@ const router = createRouter({
     scrollBehavior(to, from, savedPosition) {
         return { top: 0 }
     }
-})
+});
 
 router.beforeEach((to, from, next) => {
     const auth = getAuth(); // Obtenir l'instance d'authentification
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
+    const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
+    const currentUser = store.getters.getUser; // Obtenir l'utilisateur actuel depuis le store
     if (requiresAuth && !auth.currentUser) {
         // Si la route nécessite une authentification et que l'utilisateur n'est pas connecté
-        next('/'); 
+        next('/');
+    } else if (requiresAuth && requiresAdmin && currentUser?.right.id != 2) {
+        // Si la route nécessite l'accès administrateur et que l'utilisateur n'a pas le droit
+        next('/');
     } else {
         next(); // Sinon, permet la navigation
     }
 });
+
 export default router;

@@ -20,7 +20,6 @@ let app;
 auth.onAuthStateChanged(async user => {
   if (user) {
     const userData = await apiService.get(`/users/${user.uid}`);
-    console.log(userData)
     const userHobbies = await apiService.get(`/users/${userData.id}/hobbies`);
     store.commit('setUser', userData);
     store.commit('setUserHobbies', userHobbies);
