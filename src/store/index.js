@@ -8,6 +8,7 @@ export default createStore({
     state: {
         user: null,
         userHobbies: null,
+        hobbies: [],  // Ajout pour stocker les hobbies disponibles
         authError: null,
     },
     mutations: {
@@ -16,6 +17,9 @@ export default createStore({
         },
         setUserHobbies(state, userHobbies) {
             state.userHobbies = userHobbies;
+        },
+        setHobbies(state, hobbies) {
+            state.hobbies = hobbies;  // Ajout pour stocker les hobbies disponibles
         },
         setAuthError(state, error) {
             state.authError = error;
@@ -65,6 +69,14 @@ export default createStore({
                 }
             });
         },
+        async fetchAvailableHobbies({ commit }) {  // Nouvelle action pour récupérer les hobbies disponibles
+            try {
+                const hobbies = await apiService.get('/hobbies');
+                commit('setHobbies', hobbies);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des hobbies:", error);
+            }
+        }
     },
     getters: {
         getUser(state) {
@@ -73,6 +85,8 @@ export default createStore({
         getUserHobbies(state) {
             return state.userHobbies;
         },
-       
+        getHobbies(state) {  // Ajout d'un getter pour récupérer les hobbies disponibles
+            return state.hobbies;
+        }
     },
 });

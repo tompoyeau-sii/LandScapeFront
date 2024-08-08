@@ -11,12 +11,14 @@
         <div class="head">
           <h1 class="title text-capitalize">
             {{ currentUser.firstName }} {{ currentUser.name }}
+            {{ currentUser.email }}
           </h1>
         </div>
         <div class="text-center">
           <div class="mb-5">
             <h2>Vos principaux centres d'intérêts</h2>
             <p>(3 max)</p>
+
             <v-row>
               <v-col cols="12">
                 <v-chip
@@ -93,6 +95,8 @@ export default {
       categories: [],
       hobbies: null,
       isCategoriesExpanded: false,
+      selectedHobby: null,
+      availableHobbies: [],
     };
   },
   async mounted() {
@@ -105,6 +109,8 @@ export default {
       const hobbies = await apiService.get("/hobbies");
       console.log("Données initiales récupérées:", hobbies);
       this.hobbies = hobbies;
+      this.availableHobbies = hobbies; // Remplir la liste des hobbies disponibles
+      console.log(this.availableHobbies);
     } catch (error) {
       console.error(
         "Erreur lors de la récupération des données initiales:",
@@ -129,6 +135,13 @@ export default {
       this.isCategoriesExpanded = !this.isCategoriesExpanded;
     },
     async addHobbyToUser(hobbyId) {
+      if (
+        !hobbyId ||
+        this.userHobbies.length >= 3 ||
+        this.userHobbies.some((hobby) => hobby.id === hobbyId)
+      ) {
+        return;
+      }
       const userId = this.currentUser.id;
       apiService
         .post(`/users/hobbies/${userId}/${hobbyId}`)
@@ -182,6 +195,7 @@ export default {
   },
 };
 </script>
+
 
 
 

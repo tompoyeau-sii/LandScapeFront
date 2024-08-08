@@ -17,6 +17,12 @@
         </template>
         <v-list-item-title>Profil</v-list-item-title>
       </v-list-item>
+      <v-list-item v-if="currentUser.right.id == 2" @click="goToAdministration">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-cog"></v-icon>
+        </template>
+        <v-list-item-title>Adminstration</v-list-item-title>
+      </v-list-item>
       <v-list-item @click="handleLogout">
         <template v-slot:prepend>
           <v-icon icon="mdi-logout"></v-icon>
@@ -35,6 +41,9 @@ export default {
     ...mapActions(["logout"]),
     goToProfile() {
       this.$router.push({ name: "AccountView" });
+    },
+    goToAdministration() {
+      this.$router.push({ name: "AdministrationView" });
     },
     async handleLogout() {
       await this.logout();
