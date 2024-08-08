@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <!-- Étapes -->
+       <!-- Étapes -->
       <div
         v-for="(waypoint, index) in waypoints"
         :key="index"

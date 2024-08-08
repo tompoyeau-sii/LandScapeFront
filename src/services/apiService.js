@@ -3,78 +3,103 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 const apiService = {
     async get(endpoint) {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa(`admin:admin`)
-            },
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(`admin:admin`)
+                },
+            });
 
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            NotificationService.showError(error.message || "Une erreur s'est produite lors de la récupération des données.");
+            throw error; // Propager l'erreur pour une gestion ultérieure
         }
-
-        return await response.json();
     },
 
     async post(endpoint, data) {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa(`admin:admin`)
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json()
-        if (!response.ok) {
-            console.log(result)
-            NotificationService.showError(result.message);
-            return ;
-        }
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(`admin:admin`)
+                },
+                body: JSON.stringify(data)
+            });
 
-        NotificationService.showSuccess(result.message);
-        return result;
+            const result = await response.json();
+            if (!response.ok) {
+                NotificationService.showError(result.message);
+                throw new Error(result.message);
+            }
+
+            NotificationService.showSuccess(result.message);
+            return result;
+        } catch (error) {
+            console.error(error);
+            NotificationService.showError(error.message || "Une erreur s'est produite lors de l'envoi des données.");
+            throw error; // Propager l'erreur pour une gestion ultérieure
+        }
     },
 
     async put(endpoint, data) {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa(`admin:admin`)
-            },
-            body: JSON.stringify(data)
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(`admin:admin`)
+                },
+                body: JSON.stringify(data)
+            });
 
-        const result = await response.json()
-        if (!response.ok) {
-            NotificationService.showError(result.message);
-            return;
+            const result = await response.json();
+            if (!response.ok) {
+                NotificationService.showError(result.message);
+                throw new Error(result.message);
+            }
+
+            NotificationService.showSuccess(result.message);
+            return result;
+        } catch (error) {
+            console.error(error);
+            NotificationService.showError(error.message || "Une erreur s'est produite lors de la mise à jour des données.");
+            throw error; // Propager l'erreur pour une gestion ultérieure
         }
-
-        return result;
     },
 
     async delete(endpoint) {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa(`admin:admin`)
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(`admin:admin`)
+                }
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                NotificationService.showError(result.message);
+                throw new Error(result.message);
             }
-        });
 
-        const result = await response.json()
-        if (!response.ok) {
-            NotificationService.showError(result.message);
-            return;
+            NotificationService.showSuccess(result.message);
+            return result;
+        } catch (error) {
+            console.error(error);
+            NotificationService.showError(error.message || "Une erreur s'est produite lors de la suppression des données.");
+            throw error; // Propager l'erreur pour une gestion ultérieure
         }
-
-        NotificationService.showSuccess(result.message);
-        return result;
     }
 };
 

@@ -10,7 +10,7 @@
         <h1 class="title">LandS'Cap</h1>
       </div>
       <div class="content">
-        <transition name="slide-fade">
+       
           <v-form
             class="text-center"
             ref="form"
@@ -104,7 +104,7 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="company.address"
+                    v-model="company.siegeSocial"
                     :rules="[rules.required]"
                     label="Siège social"
                     variant="solo-filled"
@@ -120,6 +120,15 @@
                     required
                   ></v-text-field>
                 </v-col>
+                <!-- <v-col cols="12">
+                  <v-text-field
+                    v-model="company.photos"
+                    :rules="[rules.required]"
+                    label="URL des photos"
+                    variant="solo-filled"
+                    required
+                  ></v-text-field>
+                </v-col> -->
               </v-row>
               <v-btn
                 class="mt-5 register-button"
@@ -129,7 +138,7 @@
               >Soumettre</v-btn>
             </div>
           </v-form>
-        </transition>
+       
         <img
           class="img-form"
           src="@/assets/img/form.png"
@@ -139,6 +148,7 @@
     </v-card>
   </div>
 </template>
+
 <script>
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../plugins/firebaseConfig";
@@ -148,7 +158,7 @@ export default {
   data() {
     return {
       valid: false,
-      step: 1, // Nouvelle propriété pour gérer la partie du formulaire visible
+      step: 1,
       user: {
         firstName: "",
         lastName: "",
@@ -158,8 +168,9 @@ export default {
       },
       company: {
         name: "",
-        address: "",
+        siegeSocial: "",
         siret: "",
+        photos: "", // Ajout du champ "photos"
       },
       isAELChecked: false,
       rules: {
@@ -210,40 +221,70 @@ export default {
             uId: user.uid,
             right: { id: rightId },
           };
-
-          await apiService.post("/users", userData);
-
+          this.userUid = user.uid;
+         
           if (this.isAELChecked) {
-            // Attendre que la deuxième partie du formulaire soit validée
             this.step = 2;
           } else {
-            // Redirection ou autre logique après inscription réussie
+            await apiService.post("/users", userData);
             console.log("Utilisateur inscrit et connecté:", this.user);
           }
+          
         } catch (err) {
           console.error("Erreur d'inscription:", err);
         }
       }
     },
     async submitCompany() {
-      if (this.$refs.form.validate()) {
-        try {
-          const companyData = {
-            name: this.company.name,
-            address: this.company.address,
-            siret: this.company.siret,
-            userUid: this.user.uid, // Associer l'entreprise à l'utilisateur
-          };
+  if (this.$refs.form.validate()) {
+    try {
+      // Accéder aux détails de l'utilisateur actuel stockés dans les données du composant
+      const { firstName, lastName, birthDate, email, password } = this.user;
+    
+      const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            this.user.email,
+            this.user.password
+          );
+          const user = userCredential.user;
 
-          await apiService.post("/entreprises", companyData);
+          // Formatage des noms
+          this.user.lastName =
+            this.user.lastName.charAt(0).toUpperCase() +
+            this.user.lastName.slice(1).toLowerCase();
+          this.user.firstName =
+            this.user.firstName.charAt(0).toUpperCase() +
+            this.user.firstName.slice(1).toLowerCase();
 
-          // Redirection ou autre logique après l'inscription de l'entreprise
-          console.log("Entreprise ajoutée:", companyData);
-        } catch (err) {
-          console.error("Erreur d'ajout de l'entreprise:", err);
-        }
-      }
-    },
+          // Détermination de l'id du droit
+          const rightId = this.isAELChecked ? 3 : 1;
+
+      const companyData = {
+        user: {
+          firstName,
+          name: lastName,
+          birthdate: birthDate,
+          email,
+          password,
+          uId: user.uid,
+          right: { id: rightId },
+        },
+        company: {
+        name: this.company.name,
+          headOffice: this.company.siegeSocial,
+          siret: this.company.siret,
+        },
+      };
+      
+      apiService.post("/companies/createWithUser", companyData);
+
+      console.log("Entreprise ajoutée avec l'utilisateur:", companyData);
+      this.$router.push({ path: '/' });
+    } catch (err) {
+      console.error("Erreur d'ajout de l'entreprise:", err);
+    }
+  }
+},
     retourPagePrecedente() {
       this.$router.go(-1);
     },
@@ -251,12 +292,13 @@ export default {
 };
 </script>
 
+
 <style scoped>
 /* Définir la transition pour le changement de partie du formulaire */
 .slide-fade-enter-active, .slide-fade-leave-active {
   transition: opacity 0.5s, transform 0.5s;
 }
-.slide-fade-enter, .slide-fade-leave-to /* .slide-fade-leave-active dans <2.1.8 */ {
+.slide-fade-enter, .slide-fade-leave-to {
   opacity: 0;
   transform: translateX(100%);
 }
