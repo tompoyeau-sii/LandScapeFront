@@ -81,7 +81,7 @@
 
       <v-btn
         v-if="from || to"
-        color="grey"
+        color="white"
         variant="tonal"
         prepend-icon="mdi-close"
         class="ma-3 text-none"
@@ -324,8 +324,8 @@ export default {
   display: flex;
   align-items: center;
   border-radius: 10px;
-  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
-  color: white;
+  background-color: white !important;
+  color: black;
   padding: 1vh;
   margin: 1vh;
   overflow-x: auto;
@@ -334,17 +334,17 @@ export default {
 }
 
 .input-container .input-wrapper .searchIcon {
-  color: white;
+  color: black;
 }
 
 input::placeholder {
-  color: white;
+  color: black;
 }
 
 .input-container .input-wrapper .input-waypoint {
   flex: 1;
   padding-right: 2em;
-  color: white;
+  color: black;
   border: none;
   padding: 5px;
   font-size: large;

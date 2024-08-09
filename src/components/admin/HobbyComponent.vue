@@ -2,7 +2,7 @@
   <div>
     <div class="title-bar">
       <h1>Liste des hobbies</h1>
-      <v-btn color="primary" @click="showModal = true">Ajouter un hobby</v-btn>
+      <v-btn prepend-icon="mdi-plus" class="text-none" color="primary" @click="showModal = true">Ajouter un hobby</v-btn>
     </div>
     <v-card flat>
       <template v-slot:text>
@@ -19,6 +19,7 @@
         :items="hobbies"
         :headers="headers"
         :search="search"
+        items-per-page-text="Hobbies par pages : "
       >
       </v-data-table>
     </v-card>

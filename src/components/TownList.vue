@@ -83,7 +83,7 @@ export default {
 }
 
 .list-element:hover {
-  background-color: #f0f0f0;
+  background-color: #ffffff4b;
   text-decoration: underline;
 }
 </style>

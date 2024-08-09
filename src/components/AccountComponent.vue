@@ -21,7 +21,7 @@
         <template v-slot:prepend>
           <v-icon icon="mdi-cog"></v-icon>
         </template>
-        <v-list-item-title>Adminstration</v-list-item-title>
+        <v-list-item-title>Administration</v-list-item-title>
       </v-list-item>
       <v-list-item @click="handleLogout">
         <template v-slot:prepend>

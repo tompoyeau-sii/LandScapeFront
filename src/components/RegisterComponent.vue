@@ -10,117 +10,114 @@
         <h1 class="title">LandS'Cap</h1>
       </div>
       <div class="content">
-       
-          <v-form
-            class="text-center"
-            ref="form"
-            v-model="valid"
-            lazy-validation
-            :key="step"
-          >
-            <!-- Partie 1: Informations utilisateur -->
-            <div v-if="step === 1">
-              <div class="mb-5">
-                <h2>On se connait pas encore ?</h2>
-                <h3>Remédions à ça !</h3>
-              </div>
-              <v-row>
-                <v-col cols="12" lg="6">
-                  <v-text-field
-                    v-model="user.firstName"
-                    :rules="[rules.required]"
-                    label="Prénom"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" lg="6">
-                  <v-text-field
-                    v-model="user.lastName"
-                    :rules="[rules.required]"
-                    label="Nom"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model="user.birthDate"
-                    :rules="[rules.required]"
-                    label="Date de naissance"
-                    type="date"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-checkbox
-                    v-model="isAELChecked"
-                    label="AEL"
-                  ></v-checkbox>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="user.email"
-                    :rules="[rules.required, rules.email]"
-                    label="E-mail"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="user.password"
-                    :rules="[rules.required]"
-                    label="Mot de passe"
-                    type="password"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-btn
-                class="mt-5 register-button"
-                :disabled="!valid"
-                color="blue"
-                @click="handleSubmit"
-              >En route !</v-btn>
+        <v-form
+          class="text-center"
+          ref="form"
+          v-model="valid"
+          lazy-validation
+          :key="step"
+        >
+          <!-- Partie 1: Informations utilisateur -->
+          <div v-if="step === 1">
+            <div class="mb-5">
+              <h2>On se connait pas encore ?</h2>
+              <h3>Remédions à ça !</h3>
             </div>
+            <v-row>
+              <v-col cols="12" lg="6">
+                <v-text-field
+                  v-model="user.firstName"
+                  :rules="[rules.required]"
+                  label="Prénom"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" lg="6">
+                <v-text-field
+                  v-model="user.lastName"
+                  :rules="[rules.required]"
+                  label="Nom"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="user.birthDate"
+                  :rules="[rules.required]"
+                  label="Date de naissance"
+                  type="date"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-checkbox v-model="isAELChecked" label="AEL"></v-checkbox>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="user.email"
+                  :rules="[rules.required, rules.email]"
+                  label="E-mail"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="user.password"
+                  :rules="[rules.required]"
+                  label="Mot de passe"
+                  type="password"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-btn
+              class="mt-5 register-button"
+              :disabled="!valid"
+              color="blue"
+              @click="handleSubmit"
+              >En route !</v-btn
+            >
+          </div>
 
-            <!-- Partie 2: Informations entreprise -->
-            <div v-if="step === 2">
-              <div class="mb-5">
-                <h2>Informations sur l'entreprise</h2>
-              </div>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="company.name"
-                    :rules="[rules.required]"
-                    label="Nom de l'entreprise"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="company.siegeSocial"
-                    :rules="[rules.required]"
-                    label="Siège social"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="company.siret"
-                    :rules="[rules.required]"
-                    label="SIRET"
-                    variant="solo-filled"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <!-- <v-col cols="12">
+          <!-- Partie 2: Informations entreprise -->
+          <div v-if="step === 2">
+            <div class="mb-5">
+              <h2>Informations sur l'entreprise</h2>
+            </div>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="company.name"
+                  :rules="[rules.required]"
+                  label="Nom de l'entreprise"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="company.siegeSocial"
+                  :rules="[rules.required]"
+                  label="Siège social"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="company.siret"
+                  :rules="[rules.required]"
+                  label="SIRET"
+                  variant="solo-filled"
+                  required
+                ></v-text-field>
+              </v-col>
+              <!-- <v-col cols="12">
                   <v-text-field
                     v-model="company.photos"
                     :rules="[rules.required]"
@@ -129,16 +126,17 @@
                     required
                   ></v-text-field>
                 </v-col> -->
-              </v-row>
-              <v-btn
-                class="mt-5 register-button"
-                :disabled="!valid"
-                color="blue"
-                @click="submitCompany"
-              >Soumettre</v-btn>
-            </div>
-          </v-form>
-       
+            </v-row>
+            <v-btn
+              class="mt-5 register-button"
+              :disabled="!valid"
+              color="blue"
+              @click="submitCompany"
+              >Soumettre</v-btn
+            >
+          </div>
+        </v-form>
+
         <img
           class="img-form"
           src="@/assets/img/form.png"
@@ -195,6 +193,54 @@ export default {
     async submit() {
       if (this.$refs.form.validate()) {
         try {
+          // Formatage des noms
+          if (this.isAELChecked) {
+            this.step = 2;
+          } else {
+            this.user.lastName =
+              this.user.lastName.charAt(0).toUpperCase() +
+              this.user.lastName.slice(1).toLowerCase();
+            this.user.firstName =
+              this.user.firstName.charAt(0).toUpperCase() +
+              this.user.firstName.slice(1).toLowerCase();
+
+            // Détermination de l'id du droit
+            const rightId = this.isAELChecked ? 3 : 1;
+
+            // Envoyer les données utilisateur à l'API Java Spring Boot
+
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              this.user.email,
+              this.user.password
+            );
+            const user = userCredential.user;
+
+            const userData = {
+              name: this.user.lastName,
+              firstName: this.user.firstName,
+              birthdate: this.user.birthDate,
+              uId: user.uid,
+              right: { id: rightId },
+            };
+            this.userUid = user.uid;
+
+            await apiService.post("/users", userData);
+            this.$router.push("/");
+            console.log("Utilisateur inscrit et connecté:", this.user);
+
+          }
+        } catch (err) {
+          console.error("Erreur d'inscription:", err);
+        }
+      }
+    },
+    async submitCompany() {
+      if (this.$refs.form.validate()) {
+        try {
+          // Accéder aux détails de l'utilisateur actuel stockés dans les données du composant
+          const { firstName, lastName, birthDate, email, password } = this.user;
+
           const userCredential = await createUserWithEmailAndPassword(
             auth,
             this.user.email,
@@ -213,78 +259,32 @@ export default {
           // Détermination de l'id du droit
           const rightId = this.isAELChecked ? 3 : 1;
 
-          // Envoyer les données utilisateur à l'API Java Spring Boot
-          const userData = {
-            name: this.user.lastName,
-            firstName: this.user.firstName,
-            birthdate: this.user.birthDate,
-            uId: user.uid,
-            right: { id: rightId },
+          const companyData = {
+            user: {
+              firstName,
+              name: lastName,
+              birthdate: birthDate,
+              email,
+              password,
+              uId: user.uid,
+              right: { id: rightId },
+            },
+            company: {
+              name: this.company.name,
+              headOffice: this.company.siegeSocial,
+              siret: this.company.siret,
+            },
           };
-          this.userUid = user.uid;
-         
-          if (this.isAELChecked) {
-            this.step = 2;
-          } else {
-            await apiService.post("/users", userData);
-            console.log("Utilisateur inscrit et connecté:", this.user);
-          }
-          
+
+          apiService.post("/companies/createWithUser", companyData);
+
+          console.log("Entreprise ajoutée avec l'utilisateur:", companyData);
+          this.$router.push("/");
         } catch (err) {
-          console.error("Erreur d'inscription:", err);
+          console.error("Erreur d'ajout de l'entreprise:", err);
         }
       }
     },
-    async submitCompany() {
-  if (this.$refs.form.validate()) {
-    try {
-      // Accéder aux détails de l'utilisateur actuel stockés dans les données du composant
-      const { firstName, lastName, birthDate, email, password } = this.user;
-    
-      const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            this.user.email,
-            this.user.password
-          );
-          const user = userCredential.user;
-
-          // Formatage des noms
-          this.user.lastName =
-            this.user.lastName.charAt(0).toUpperCase() +
-            this.user.lastName.slice(1).toLowerCase();
-          this.user.firstName =
-            this.user.firstName.charAt(0).toUpperCase() +
-            this.user.firstName.slice(1).toLowerCase();
-
-          // Détermination de l'id du droit
-          const rightId = this.isAELChecked ? 3 : 1;
-
-      const companyData = {
-        user: {
-          firstName,
-          name: lastName,
-          birthdate: birthDate,
-          email,
-          password,
-          uId: user.uid,
-          right: { id: rightId },
-        },
-        company: {
-        name: this.company.name,
-          headOffice: this.company.siegeSocial,
-          siret: this.company.siret,
-        },
-      };
-      
-      apiService.post("/companies/createWithUser", companyData);
-
-      console.log("Entreprise ajoutée avec l'utilisateur:", companyData);
-      this.$router.push({ path: '/' });
-    } catch (err) {
-      console.error("Erreur d'ajout de l'entreprise:", err);
-    }
-  }
-},
     retourPagePrecedente() {
       this.$router.go(-1);
     },
@@ -295,10 +295,12 @@ export default {
 
 <style scoped>
 /* Définir la transition pour le changement de partie du formulaire */
-.slide-fade-enter-active, .slide-fade-leave-active {
+.slide-fade-enter-active,
+.slide-fade-leave-active {
   transition: opacity 0.5s, transform 0.5s;
 }
-.slide-fade-enter, .slide-fade-leave-to {
+.slide-fade-enter,
+.slide-fade-leave-to {
   opacity: 0;
   transform: translateX(100%);
 }

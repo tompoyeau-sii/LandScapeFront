@@ -70,7 +70,8 @@ h3 {
   display: flex;
   flex-direction: column;
   border-radius: 15px;
-  background-color: white;
+  background: linear-gradient(115deg, #4faaf5 0%, #1f30c9 100%) !important;
+  color: white;
   align-items: stretch;
   width: 20%;
 }

@@ -15,6 +15,7 @@
       :items="users"
       :headers="headers"
       :search="search"
+      items-per-page-text="Utilisateurs par pages : "
     >
       <template v-slot:[`item.companiesDisplay`]="{ item }">
         <v-btn
@@ -35,7 +36,7 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          {{ selectedCompany ? selectedCompany.name : "Détails des entreprises" }}
+          {{ selectedCompany ? selectedCompany.name : "Entreprises" }}
         </span>
       </v-card-title>
       <v-card-text>
