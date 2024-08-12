@@ -42,7 +42,6 @@ export default createStore({
                 console.log(userData)
                 commit('setUser', userData);
                 commit('setUserHobbies', userHobbies);
-
             } catch (err) {
                 console.error(err);
                 commit('setAuthError', err.message);
@@ -61,9 +60,10 @@ export default createStore({
                 if (user) {
                     const userData = await apiService.get(`/users/${user.uid}`);
                     const userHobbies = await apiService.get(`/users/${userData.id}/hobbies`);
-                    console.log(userData)
+                    // console.log(userData)
                     commit('setUser', userData);
                     commit('setUserHobbies', userHobbies);
+ 
                 } else {
                     commit('clearUser');
                 }

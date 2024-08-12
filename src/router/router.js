@@ -16,6 +16,11 @@ const routes = [
         component: () => import('../views/RegisterView.vue'),
     },
     {
+        path: '/gestentreprise',
+        name: 'EntrepriseView',
+        component: () => import('../views/EntrepriseView.vue'),
+    },
+    {
         path: '/profil',
         name: 'AccountView',
         component: () => import('../views/AccountView.vue'),
