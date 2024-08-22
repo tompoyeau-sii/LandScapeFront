@@ -17,6 +17,12 @@
       :search="search"
       items-per-page-text="Utilisateurs par pages : "
     >
+      <!-- Slot pour afficher une icône à la place du booléen -->
+      <template v-slot:[`item.isSub`]="{ item }">
+        <v-icon v-if="item.isSub" color="green">mdi-check</v-icon>
+        <v-icon v-else color="red">mdi-close</v-icon>
+      </template>
+      
       <template v-slot:[`item.companiesDisplay`]="{ item }">
         <v-btn
           v-if="item.companies && item.companies.length > 0"
@@ -95,6 +101,7 @@ export default {
         { title: "Nom", align: "start", key: "name" },
         { title: "Date de naissance", align: "start", key: "birthdate" },
         { title: "Droit", align: "start", key: "right.label" },
+        { title: "Abonné", align: "start", key: "isSub" },
         { title: "Entreprises", align: "start", key: "companiesDisplay" },
       ],
     };

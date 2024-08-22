@@ -3,6 +3,34 @@
     <h3 class="mt-3">Activités</h3>
     <v-expansion-panels>
       <v-expansion-panel
+        v-for="poi in aelPoiList"
+        :key="poi.id"
+        @click="selectPoi(poi)"
+      >
+        <v-expansion-panel-title>
+          <div class="title-container">
+            <div class="name-tag">
+              <span>{{ poi.name }}</span>
+              <span class="tag">{{ poi.category.label }}</span>
+            </div>
+            <div class="chip-rating-container">
+              <v-chip>Annonce</v-chip>
+              <span class="poi-rating">
+                {{ getRandomRating(poi.id) }}
+                <v-icon class="rating-icon" icon="mdi-star"></v-icon>
+              </span>
+            </div>
+          </div>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <a>Définir comme destination</a>
+          <br />
+          <a>Ajouter cette étape</a>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-expansion-panels>
+      <v-expansion-panel
         v-for="poi in filteredPoiList"
         :key="poi.id"
         @click="selectPoi(poi)"
@@ -13,10 +41,12 @@
               <span>{{ poi.tags.name }}</span>
               <span class="tag">{{ poi.tags.tourism }}</span>
             </div>
-            <span class="poi-rating">
-              {{ getRandomRating(poi.id) }}
-              <v-icon class="rating-icon" icon="mdi-star"></v-icon>
-            </span>
+            <div class="chip-rating-container">
+              <span class="poi-rating">
+                {{ getRandomRating(poi.id) }}
+                <v-icon class="rating-icon" icon="mdi-star"></v-icon>
+              </span>
+            </div>
           </div>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -28,13 +58,16 @@
     </v-expansion-panels>
   </div>
 </template>
-
 <script>
 import { reactive } from "vue";
 
 export default {
   props: {
     poiList: {
+      type: Array,
+      required: true,
+    },
+    aelPoiList: {
       type: Array,
       required: true,
     },
@@ -65,6 +98,9 @@ export default {
         return false;
       });
     },
+    allPoisList() {
+    return [...this.aelPoiList, ...this.filteredPoiList];
+  }
   },
   methods: {
     selectPoi(poi) {
@@ -103,9 +139,16 @@ h3 {
   flex-direction: column;
 }
 
+.chip-rating-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Aligne le contenu à droite */
+}
+
 .poi-rating {
   display: flex;
   align-items: center;
+  margin-top: 0.5rem;
 }
 
 .rating-icon {

@@ -1,10 +1,20 @@
 <template>
   <div class="header">
-    <overlay @stopRoute="stopRoute" @selectRoute="showRoute" @locationSelected="handleLocationSelected"
-      :distance="routeDistance" :time="routeTime"></overlay>
+    <overlay
+      @stopRoute="stopRoute"
+      @selectRoute="showRoute"
+      @locationSelected="handleLocationSelected"
+      :distance="routeDistance"
+      :time="routeTime"
+    ></overlay>
     <panel :route="route"></panel>
   </div>
-  <PoiList v-if="poiList" :poiList="poiList" @poi-selected="handlePoiSelected"></PoiList>
+  <PoiList
+    v-if="poiList"
+    :aelPoiList="aelPoiList"
+    :poiList="poiList"
+    @poi-selected="handlePoiSelected"
+  ></PoiList>
   <div>
     <div id="map" style="height: 100vh"></div>
   </div>
@@ -26,16 +36,17 @@ import {
   createMarker,
   createRouteControl,
   fitMapToBounds,
-  createPoiMarker
+  createPoiMarker,
 } from "@/utils/mapUtils";
 import Panel from "@/components/PanelComponent.vue";
+import apiService from "@/services/apiService";
 
 export default {
   name: "MapView",
   components: {
     Overlay,
     Panel,
-    PoiList
+    PoiList,
   },
   data() {
     return {
@@ -43,12 +54,13 @@ export default {
       route: null,
       routeControl: null,
       point: null,
+      aelPoiList: null,
       poiList: null,
       startMarker: null,
       endMarker: null,
       selectedPoi: null,
       routeDistance: "0",
-      routeTime: "0"
+      routeTime: "0",
     };
   },
   computed: {
@@ -66,7 +78,7 @@ export default {
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 20,
       }).addTo(this.map);
-      console.log(this.map)
+      console.log(this.map);
     },
 
     zoomToLocation(lat, lng) {
@@ -76,6 +88,21 @@ export default {
     handleLocationSelected(location) {
       this.point = location;
       this.zoomToLocation(location.lat, location.lng);
+      
+      const params = new URLSearchParams({
+        latitude: location.lat,
+        longitude: location.lng,
+        // radius: 1.0, // Ajoutez-le si nécessaire
+      });
+
+      apiService
+        .get(`/poi/within-radius?${params.toString()}`)
+        .then((data) => {
+          this.aelPoiList = data;
+        })
+        .catch((error) => {
+          console.error("Erreur:", error);
+        });
 
       poiService
         .getPOI(location.lat, location.lng)
@@ -134,7 +161,7 @@ export default {
 
     stopRoute() {
       this.poiList = null;
-      this.removeMarkers()
+      this.removeMarkers();
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
         this.routeDistance = 0;
@@ -159,7 +186,7 @@ export default {
         this.zoomToLocation(location.lat, location.lng);
         this.selectedPoi = poi;
       }
-    }
+    },
   },
 };
 </script>

@@ -23,6 +23,12 @@
         </template>
         <v-list-item-title>Administration</v-list-item-title>
       </v-list-item>
+      <v-list-item v-if="currentUser.right.id == 3" @click="goToCompany">
+        <template v-slot:prepend>
+          <v-icon icon="mdi-office-building"></v-icon>
+        </template>
+        <v-list-item-title>Mon entreprise</v-list-item-title>
+      </v-list-item>
       <v-list-item @click="handleLogout">
         <template v-slot:prepend>
           <v-icon icon="mdi-logout"></v-icon>
@@ -44,6 +50,9 @@ export default {
     },
     goToAdministration() {
       this.$router.push("/administration/users");
+    },
+    goToCompany() {
+      this.$router.push("/ael/entreprises");
     },
     async handleLogout() {
       await this.logout();

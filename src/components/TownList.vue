@@ -7,7 +7,7 @@
       @click="selectOption(option)"
     >
       <i class="fas fa-map-marker-alt"></i>
-      {{ option.display_name }}
+      {{ option.label }}
     </p>
   </div>
 </template>
@@ -44,6 +44,7 @@ export default {
       try {
         const response = await mapApiService.searchLocation(newVal);
         this.options = response;
+        console.log(response)
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des suggestions :",

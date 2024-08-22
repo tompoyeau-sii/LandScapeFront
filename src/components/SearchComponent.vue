@@ -17,7 +17,7 @@
         </div>
       </div>
 
-       <!-- Étapes -->
+      <!-- Étapes -->
       <div
         v-for="(waypoint, index) in waypoints"
         :key="index"
@@ -50,7 +50,7 @@
             :key="option.place_id"
             @click="selectWaypointOption(index, option)"
           >
-            {{ option.display_name }}
+            {{ option.label }}
           </p>
         </div>
       </div>
@@ -58,7 +58,7 @@
       <v-btn
         v-if="from && to"
         @click="addWaypoint"
-        color="blue"
+        color="white"
         variant="tonal"
         prepend-icon="mdi-plus"
         class="ma-3 text-none"
@@ -130,17 +130,17 @@ export default {
   },
   methods: {
     async handleOptionSelected({ option, type }) {
-      const latitude = parseFloat(option.lat);
-      const longitude = parseFloat(option.lon);
+      const latitude = parseFloat(option.coordinates[1]);
+      const longitude = parseFloat(option.coordinates[0]);
 
       if (type === "from") {
-        this.from = option.display_name;
+        this.from = option.label;
         this.showFromOptions = false;
         if (this.to === "") {
           this.$emit("locationSelected", { lat: latitude, lng: longitude });
         }
       } else if (type === "to") {
-        this.to = option.display_name;
+        this.to = option.label;
         this.showToOptions = false;
         if (this.from === "") {
           this.$emit("locationSelected", { lat: latitude, lng: longitude });
@@ -197,9 +197,8 @@ export default {
 
         const locationData = await mapApiService.getLocationData(lat, lng);
         const option = {
-          lat: lat.toString(),
-          lon: lng.toString(),
-          display_name: locationData.city,
+          coordinates: [lng.toString(), lat.toString()],
+          label: locationData.city,
         };
         this.handleOptionSelected({ option, type: "from" });
         this.from = locationData.city;
@@ -241,7 +240,7 @@ export default {
 
     selectWaypointOption(index, option) {
       this.waypoints[index] = {
-        location: option.display_name,
+        location: option.label,
         options: [],
       };
       this.updateRoute();

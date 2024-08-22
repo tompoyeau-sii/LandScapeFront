@@ -6,8 +6,6 @@
       <div v-else>
         <notification-list></notification-list>
         <Account></Account>
-        <!-- Ajout du bouton pour la redirection -->
-        <v-btn @click="goToGestEntreprise">Gérer l'entreprise</v-btn>
       </div>
     </div>
   </div>
@@ -19,8 +17,6 @@ import NotificationList from "@/components/NotificationList.vue";
 import Account from "@/components/AccountComponent.vue";
 import { mapState } from "vuex";
 import Meteo from "@/components/MeteoComponent.vue";
-import { mapActions } from "vuex";
-
 export default {
   props: {
     route: {
@@ -36,11 +32,6 @@ export default {
   },
   computed: {
     ...mapState(["user"]), // Ajoutez l'état de l'utilisateur depuis Vuex
-  },
-  methods: {
-    goToGestEntreprise() {
-      this.$router.push('/gestentreprise');
-    }
   }
 };
 </script>
@@ -66,8 +57,5 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
-.account button:hover {
-  background-color: #0056b3;
 }
 </style>

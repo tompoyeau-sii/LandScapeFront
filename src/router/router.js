@@ -1,8 +1,11 @@
-import { createWebHistory, createRouter } from 'vue-router'
+import { createWebHistory, createRouter } from 'vue-router';
 import { getAuth } from 'firebase/auth'; // Importation de l'authentification Firebase
 import ListUsersComponent from '@/components/admin/ListUsersComponent.vue';
 import store from '@/store'; // Assurez-vous que le store Vuex est correctement importé
 import HobbyComponent from '@/components/admin/HobbyComponent.vue';
+import CompaniesListComponent from '@/components/ael/CompaniesListComponent.vue';
+import CompanyDetailsComponent from '@/components/ael/CompanyDetailsComponent.vue'; // Importez votre composant de détails de l'entreprise
+import CompanyView from '@/views/CompanyView.vue';
 
 const routes = [
     {
@@ -16,15 +19,31 @@ const routes = [
         component: () => import('../views/RegisterView.vue'),
     },
     {
-        path: '/gestentreprise',
-        name: 'EntrepriseView',
-        component: () => import('../views/EntrepriseView.vue'),
-    },
-    {
         path: '/profil',
         name: 'AccountView',
         component: () => import('../views/AccountView.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/ael',
+        name: 'CompanyView',
+        component: CompanyView,
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: 'entreprises',
+                name: 'CompaniesList',
+                component: CompaniesListComponent,
+                meta: { requiresAuth: true },
+                // Suppression du niveau enfant ici
+            },
+            {
+                path: 'entreprises/:id',
+                name: 'CompanyDetails',
+                component: CompanyDetailsComponent,
+                meta: { requiresAuth: true },
+            }
+        ]
     },
     {
         path: '/administration',
