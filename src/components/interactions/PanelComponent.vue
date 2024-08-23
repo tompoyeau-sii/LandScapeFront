@@ -12,9 +12,9 @@
 </template>
 
 <script>
-import Connexion from "@/components/interactions/account/ConnexionComponent.vue";
+import Connexion from "@/components/interactions/user/ConnexionComponent.vue";
 import NotificationList from "@/components/interactions/NotificationList.vue";
-import Account from "@/components/interactions/account/AccountComponent.vue";
+import Account from "@/components/interactions/user/AccountComponent.vue";
 import { mapState } from "vuex";
 import Meteo from "@/components/interactions/MeteoComponent.vue";
 export default {

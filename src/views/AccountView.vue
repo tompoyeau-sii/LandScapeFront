@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import ProfilComponent from '@/components/interactions/account/ProfilComponent.vue'
+import ProfilComponent from '@/components/interactions/user/ProfilComponent.vue'
 export default {
   components: { ProfilComponent },
 
