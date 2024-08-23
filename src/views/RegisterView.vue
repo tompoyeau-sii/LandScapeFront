@@ -4,7 +4,7 @@
 
 <script>
 
-import RegisterComponent from "@/components/RegisterComponent.vue";
+import RegisterComponent from "@/components/interactions/user/RegisterComponent.vue";
 export default {
   name: "CreateAccountView",
   components: {

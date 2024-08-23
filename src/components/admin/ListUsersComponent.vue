@@ -22,7 +22,7 @@
         <v-icon v-if="item.isSub" color="green">mdi-check</v-icon>
         <v-icon v-else color="red">mdi-close</v-icon>
       </template>
-      
+
       <template v-slot:[`item.companiesDisplay`]="{ item }">
         <v-btn
           v-if="item.companies && item.companies.length > 0"
@@ -56,7 +56,9 @@
             >
               <v-list-item-content>
                 <v-list-item-title>{{ company.name }}</v-list-item-title>
-                <v-list-item-subtitle>{{ company.description }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{
+                  company.description
+                }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -65,13 +67,28 @@
           <div>
             <p><strong>Nom :</strong> {{ selectedCompany.name }}</p>
             <p><strong>Siret :</strong> {{ selectedCompany.siret }}</p>
-            <p><strong>Emplacements :</strong> {{ selectedCompany.pois }}</p>
-            <!-- Ajoutez d'autres détails ici si nécessaire -->
+            <v-col v-for="poi in selectedCompany.pois" :key="poi.id">
+              <v-card class="poi-card">
+                <v-card-title>
+                  <span class="mr-3">{{ poi.name }}</span>
+                  <v-chip class="poi-category">{{ poi.category.label }}</v-chip>
+                </v-card-title>
+                <v-card-text>
+                  <p><strong>Adresse:</strong> {{ poi.address }}</p>
+                  <p><strong>Description:</strong> {{ poi.description }}</p>
+                </v-card-text>
+              </v-card>
+            </v-col>
           </div>
         </template>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="selectedCompany" color="blue darken-1" text @click="selectedCompany = null">
+        <v-btn
+          v-if="selectedCompany"
+          color="blue darken-1"
+          text
+          @click="selectedCompany = null"
+        >
           Retour
         </v-btn>
         <v-spacer></v-spacer>
@@ -110,11 +127,10 @@ export default {
     try {
       const users = await apiService.get("/users");
       console.log("Données initiales récupérées:", users);
-      this.users = users.map(user => ({
+      this.users = users.map((user) => ({
         ...user,
         birthdate: this.formatDate(user.birthdate),
       }));
-      
     } catch (error) {
       console.error(
         "Erreur lors de la récupération des données initiales:",

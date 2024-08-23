@@ -28,7 +28,7 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-control-geocoder";
 import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import poiService from "@/services/poiService";
-import Overlay from "@/components/OverlayComponent.vue";
+import Overlay from "@/components/search/OverlayComponent.vue";
 import PoiList from "@/components/PoiListComponent.vue";
 
 import { mapState } from "vuex";
@@ -38,7 +38,7 @@ import {
   fitMapToBounds,
   createPoiMarker,
 } from "@/utils/mapUtils";
-import Panel from "@/components/PanelComponent.vue";
+import Panel from "@/components/interactions/PanelComponent.vue";
 import apiService from "@/services/apiService";
 
 export default {

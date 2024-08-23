@@ -101,15 +101,6 @@
               </v-col>
               <v-col cols="12">
                 <v-text-field
-                  v-model="company.siegeSocial"
-                  :rules="[rules.required]"
-                  label="Siège social"
-                  variant="solo-filled"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
                   v-model="company.siret"
                   :rules="[rules.required]"
                   label="SIRET"
@@ -149,7 +140,7 @@
 
 <script>
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../plugins/firebaseConfig";
+import { auth } from "../../../plugins/firebaseConfig";
 import apiService from "@/services/apiService";
 
 export default {
@@ -163,12 +154,11 @@ export default {
         birthDate: "",
         email: "",
         password: "",
+        isSub: false
       },
       company: {
         name: "",
-        siegeSocial: "",
-        siret: "",
-        photos: "", // Ajout du champ "photos"
+        siret: ""
       },
       isAELChecked: false,
       rules: {
@@ -205,7 +195,7 @@ export default {
               this.user.firstName.slice(1).toLowerCase();
 
             // Détermination de l'id du droit
-            const rightId = this.isAELChecked ? 3 : 1;
+            const rightId = 1;
 
             // Envoyer les données utilisateur à l'API Java Spring Boot
 
@@ -220,6 +210,7 @@ export default {
               name: this.user.lastName,
               firstName: this.user.firstName,
               birthdate: this.user.birthDate,
+              isSub: this.user.isSub,
               uId: user.uid,
               right: { id: rightId },
             };
@@ -239,7 +230,7 @@ export default {
       if (this.$refs.form.validate()) {
         try {
           // Accéder aux détails de l'utilisateur actuel stockés dans les données du composant
-          const { firstName, lastName, birthDate, email, password } = this.user;
+          const { firstName, lastName, birthDate, email, password, isSub } = this.user;
 
           const userCredential = await createUserWithEmailAndPassword(
             auth,
@@ -257,13 +248,14 @@ export default {
             this.user.firstName.slice(1).toLowerCase();
 
           // Détermination de l'id du droit
-          const rightId = this.isAELChecked ? 3 : 1;
+          const rightId = 3;
 
           const companyData = {
             user: {
               firstName,
               name: lastName,
               birthdate: birthDate,
+              isSub: isSub,
               email,
               password,
               uId: user.uid,
@@ -271,14 +263,12 @@ export default {
             },
             company: {
               name: this.company.name,
-              headOffice: this.company.siegeSocial,
-              siret: this.company.siret,
+              siret: this.company.siret
             },
           };
-
+          
           apiService.post("/companies/createWithUser", companyData);
-
-          console.log("Entreprise ajoutée avec l'utilisateur:", companyData);
+          console.log("Entreprise créée avec l'utilisateur:", companyData);
           this.$router.push("/");
         } catch (err) {
           console.error("Erreur d'ajout de l'entreprise:", err);

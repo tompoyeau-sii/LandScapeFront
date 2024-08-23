@@ -12,11 +12,11 @@
 </template>
 
 <script>
-import Connexion from "@/components/ConnexionComponent.vue";
-import NotificationList from "@/components/NotificationList.vue";
-import Account from "@/components/AccountComponent.vue";
+import Connexion from "@/components/interactions/account/ConnexionComponent.vue";
+import NotificationList from "@/components/interactions/NotificationList.vue";
+import Account from "@/components/interactions/account/AccountComponent.vue";
 import { mapState } from "vuex";
-import Meteo from "@/components/MeteoComponent.vue";
+import Meteo from "@/components/interactions/MeteoComponent.vue";
 export default {
   props: {
     route: {
