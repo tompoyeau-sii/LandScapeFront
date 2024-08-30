@@ -26,19 +26,25 @@
 export default {
   data() {
     return {
-      drawer: true,
+      // Déclaration de la donnée 'drawer' pour contrôler l'état du tiroir de navigation
+      drawer: true,  // Le tiroir est ouvert par défaut
     };
   },
   methods: {
+    // Méthode pour naviguer vers une vue spécifique
     navigateTo(view) {
+      // Change la route en ajoutant '/ael/{view}' à l'URL
       this.$router.push(`/ael/${view}`);
     },
+    // Méthode pour revenir à la page d'accueil
     goBack() {
+      // Change la route pour revenir à la page d'accueil ('/')
       this.$router.push("/");
     },
   },
 };
 </script>
+
 
 <style>
 .toolbar {

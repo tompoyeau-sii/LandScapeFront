@@ -14,38 +14,43 @@
 </template>
 
 <script>
-import SearchComponent from "./SearchComponent.vue";
+import SearchComponent from "./SearchComponent.vue"; // Importation du composant SearchComponent
+
 export default {
-  components: { SearchComponent },
+  components: { SearchComponent }, // Déclaration du composant SearchComponent pour l'utiliser dans le template
+
   props: {
     distance: {
-      type: String,
-      default: "0",
+      type: String, // La prop 'distance' est de type String
+      default: "0", // Valeur par défaut si aucun 'distance' n'est fourni
     },
     time: {
-      type: String,
-      default: "0",
+      type: String, // La prop 'time' est de type String
+      default: "0", // Valeur par défaut si aucun 'time' n'est fourni
     },
   },
+
   data() {
     return {
-      routeDistance: 0, // Variable pour stocker la distance
-      routeTime: 0, // Variable pour stocker le temps
+      routeDistance: 0, // Variable pour stocker la distance du trajet, initialisée à 0
+      routeTime: 0, // Variable pour stocker le temps du trajet, initialisée à 0
     };
   },
+
   computed: {
     formattedTime() {
-      const timeInMinutes = parseFloat(this.time);
-      if (timeInMinutes >= 60) {
-        const hours = Math.floor(timeInMinutes / 60);
-        const minutes = timeInMinutes % 60;
-        return `${hours} h ${minutes.toFixed(0)} minutes`;
+      const timeInMinutes = parseFloat(this.time); // Convertir la prop 'time' en nombre flottant
+      if (timeInMinutes >= 60) { // Si le temps est supérieur ou égal à une heure
+        const hours = Math.floor(timeInMinutes / 60); // Calculer le nombre d'heures
+        const minutes = timeInMinutes % 60; // Calculer le reste en minutes
+        return `${hours} h ${minutes.toFixed(0)} minutes`; // Retourner le temps formaté en heures et minutes
       }
-      return `${timeInMinutes.toFixed(2)} minutes`;
+      return `${timeInMinutes.toFixed(2)} minutes`; // Retourner le temps formaté en minutes seulement
     },
   },
 };
 </script>
+
 
 <style scoped>
 h3 {

@@ -89,14 +89,14 @@ import apiService from "@/services/apiService";
 export default {
   data() {
     return {
-      showHobbyModal: false,
-      newHobby: "",
-      valid: true,
-      categories: [],
-      hobbies: null,
-      isCategoriesExpanded: false,
-      selectedHobby: null,
-      availableHobbies: [],
+      showHobbyModal: false, // Contrôle l'affichage du modal d'ajout de hobbies
+      newHobby: "", // Stocke la valeur du nouveau hobby à ajouter
+      valid: true, // Indique si le formulaire est valide
+      categories: [], // Liste des catégories récupérées depuis l'API
+      hobbies: null, // Liste des hobbies récupérés depuis l'API
+      isCategoriesExpanded: false, // Contrôle si les catégories sont étendues ou non
+      selectedHobby: null, // Stocke l'hobby sélectionné (peut-être utilisé dans le modal)
+      availableHobbies: [], // Liste des hobbies disponibles pour ajout
     };
   },
   async mounted() {
@@ -119,34 +119,41 @@ export default {
     }
   },
   methods: {
+    // Méthode pour basculer l'affichage des hobbies d'une catégorie
     toggleHobbies(categoryId) {
       this.categories = this.categories.map((category) => {
         if (category.id === categoryId) {
-          category.showHobbies = !category.showHobbies;
+          category.showHobbies = !category.showHobbies; // Change l'état d'affichage des hobbies
         }
         return category;
       });
     },
+    
+    // Méthode pour revenir à la page précédente dans l'historique du navigateur
     retourPagePrecedente() {
       this.$router.go(-1);
     },
+    
+    // Méthode pour ouvrir ou fermer le modal d'ajout de hobbies
     toggleHobbyModal() {
-      this.showHobbyModal = true;
-      this.isCategoriesExpanded = !this.isCategoriesExpanded;
+      this.showHobbyModal = true; // Ouvre le modal
+      this.isCategoriesExpanded = !this.isCategoriesExpanded; // Bascule l'état des catégories
     },
+    
+    // Méthode asynchrone pour ajouter un hobby à l'utilisateur
     async addHobbyToUser(hobbyId) {
       if (
-        !hobbyId ||
-        this.userHobbies.length >= 3 ||
-        this.userHobbies.some((hobby) => hobby.id === hobbyId)
+        !hobbyId || // Vérifie si l'ID du hobby est valide
+        this.userHobbies.length >= 3 || // Vérifie si le nombre de hobbies est déjà au maximum
+        this.userHobbies.some((hobby) => hobby.id === hobbyId) // Vérifie si le hobby est déjà ajouté
       ) {
-        return;
+        return; // Ne fait rien si une des conditions est remplie
       }
-      const userId = this.currentUser.id;
+      const userId = this.currentUser.id; // Récupère l'ID de l'utilisateur actuel
       apiService
-        .post(`/users/hobbies/${userId}/${hobbyId}`)
+        .post(`/users/hobbies/${userId}/${hobbyId}`) // Envoie une requête POST pour ajouter le hobby
         .then(async (res) => {
-          // Recharger la liste des hobbies de l'utilisateur
+          // Recharger la liste des hobbies de l'utilisateur après l'ajout
           if (res?.success) {
             const userHobbies = await apiService.get(
               `/users/${userId}/hobbies`
@@ -156,12 +163,15 @@ export default {
           }
         });
     },
+    
+    // Méthode asynchrone pour supprimer un hobby de l'utilisateur
     async removeHobbyFromUser(hobbyId) {
       try {
-        const userId = this.currentUser.id;
-        await apiService.delete(`/users/hobbies/${userId}/${hobbyId}`);
+        const userId = this.currentUser.id; // Récupère l'ID de l'utilisateur actuel
+        await apiService.delete(`/users/hobbies/${userId}/${hobbyId}`); // Envoie une requête DELETE pour supprimer le hobby
         console.log("Hobby supprimé:", hobbyId);
 
+        // Recharger la liste des hobbies de l'utilisateur après la suppression
         const userHobbies = await apiService.get(`/users/${userId}/hobbies`);
         this.$store.commit("setUserHobbies", userHobbies);
         console.log("Liste des hobbies rechargée:", userHobbies);
@@ -169,12 +179,16 @@ export default {
         console.error("Erreur lors de la suppression du hobby:", error);
       }
     },
+    
+    // Règle de validation pour le nombre maximum de hobbies
     maxHobbiesRule(v) {
       if (!v) {
         return true;
       }
       return v.length <= 3 || "Vous ne pouvez pas ajouter plus de 3 hobbies.";
     },
+    
+    // Règle de validation pour les hobbies uniques
     uniqueHobbyRule(v) {
       if (!v) {
         return true;
@@ -188,16 +202,14 @@ export default {
     },
   },
   computed: {
+    // Mappe les getters du store Vuex pour obtenir les données nécessaires
     ...mapGetters({
-      currentUser: "getUser",
-      userHobbies: "getUserHobbies",
+      currentUser: "getUser", // Récupère l'utilisateur actuel
+      userHobbies: "getUserHobbies", // Récupère les hobbies de l'utilisateur
     }),
   },
 };
 </script>
-
-
-
 
 <style scoped>
 html {

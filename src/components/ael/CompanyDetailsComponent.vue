@@ -109,11 +109,15 @@
 import apiService from "@/services/apiService";
 import mapApiService from "@/services/mapApiService";
 import { debounce } from "lodash";
+
 export default {
   data() {
     return {
+      // Données de l'entreprise récupérées
       company: null,
+      // Contrôle de la visibilité du modal d'ajout d'un POI
       showPOIModal: false,
+      // Informations du nouveau POI à ajouter
       newPOI: {
         name: "",
         address: "",
@@ -123,51 +127,68 @@ export default {
         categoryId: null,
         companyId: null
       },
+      // Contrôle de la visibilité des suggestions d'adresse
       showAddressSuggestions: false,
+      // Liste des options d'adresses trouvées
       addressOptions: [],
+      // Liste des catégories pour le POI
       categories: [],
     };
   },
   methods: {
+    // Méthode pour revenir à la page précédente
     retourPagePrecedente() {
       this.$router.go(-1);
     },
+    // Méthode pour récupérer les détails de l'entreprise depuis l'API
     async fetchCompanyDetails() {
       try {
+        // Récupère l'ID de l'entreprise depuis les paramètres de la route
         const companyId = this.$route.params.id;
+        // Appelle le service API pour obtenir les détails de l'entreprise
         const company = await apiService.get(`/companies/${companyId}`);
         this.company = company;
       } catch (error) {
+        // Gestion des erreurs lors de la récupération des détails de l'entreprise
         console.error(
           "Erreur lors de la récupération des détails de l'entreprise:",
           error
         );
       }
     },
+    // Méthode pour fermer le modal d'ajout de POI
     closePOIModal() {
       this.showPOIModal = false;
+      // Réinitialise les données du nouveau POI
       this.newPOI = {
         name: "",
         address: "",
         description: "",
         lat: null,
         lon: null,
-        category: null,
+        categoryId: null,
+        companyId: null
       };
       this.addressOptions = [];
       this.showAddressSuggestions = false;
     },
+    // Méthode pour ajouter un POI à l'entreprise
     async addPOI() {
       try {
-        this.newPOI.companyId = this.company.id
+        // Assigne l'ID de l'entreprise au nouveau POI
+        this.newPOI.companyId = this.company.id;
+        // Appelle le service API pour ajouter le POI
         await apiService.post(`/poi`, this.newPOI);
+        // Ferme le modal après ajout
         this.closePOIModal();
+        // Recharge les détails de l'entreprise pour inclure le nouveau POI
         await this.fetchCompanyDetails();
       } catch (error) {
+        // Gestion des erreurs lors de l'ajout du POI
         console.error("Erreur lors de l'ajout du POI:", error);
-        console.log(this.newPOI)
       }
     },
+    // Méthode pour rechercher des options d'adresses avec debounce
     async searchAddressOptions() {
       const address = this.newPOI.address;
       if (address.length < 3) {
@@ -175,33 +196,41 @@ export default {
         return;
       }
       try {
+        // Appelle le service de recherche d'adresses pour obtenir les options
         const options = await mapApiService.searchLocation(address);
         this.addressOptions = options;
         this.showAddressSuggestions = true;
       } catch (error) {
+        // Gestion des erreurs lors de la recherche des adresses
         console.error("Erreur lors de la recherche des adresses:", error);
       }
     },
+    // Méthode pour sélectionner une adresse parmi les suggestions
     selectAddress(option) {
       this.newPOI.address = option.label;
       this.newPOI.lat = option.coordinates[1];
       this.newPOI.lon = option.coordinates[0];
       this.showAddressSuggestions = false;
     },
+    // Méthode pour récupérer les catégories depuis l'API
     async fetchCategories() {
       try {
+        // Appelle le service API pour obtenir la liste des catégories
         const categories = await apiService.get("/categories");
         this.categories = categories;
       } catch (error) {
+        // Gestion des erreurs lors de la récupération des catégories
         console.error("Erreur lors de la récupération des catégories:", error);
       }
     },
   },
   async mounted() {
+    // Appelle les méthodes pour récupérer les détails de l'entreprise et les catégories après le montage du composant
     await this.fetchCompanyDetails();
     await this.fetchCategories();
   },
   created() {
+    // Configure la recherche d'adresses avec un debounce de 500ms pour limiter le nombre de requêtes
     this.debouncedSearchAddressOptions = debounce(
       this.searchAddressOptions,
       500
@@ -209,6 +238,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .return-button {

@@ -44,27 +44,43 @@ import { mapActions, mapGetters } from "vuex";
 
 export default {
   methods: {
+    // Les actions du store Vuex sont mappées ici
     ...mapActions(["logout"]),
+    
+    // Méthode pour naviguer vers la vue de profil
     goToProfile() {
+      // Utilise le routeur pour naviguer vers la route nommée "AccountView"
       this.$router.push({ name: "AccountView" });
     },
+
+    // Méthode pour naviguer vers la page d'administration
     goToAdministration() {
+      // Utilise le routeur pour naviguer vers la route "/administration/users"
       this.$router.push("/administration/users");
     },
+
+    // Méthode pour naviguer vers la page de l'entreprise
     goToCompany() {
+      // Utilise le routeur pour naviguer vers la route "/ael/entreprises"
       this.$router.push("/ael/entreprises");
     },
+
+    // Méthode pour gérer la déconnexion
     async handleLogout() {
+      // Appelle l'action 'logout' pour déconnecter l'utilisateur
       await this.logout();
     },
   },
   computed: {
+    // Les getters du store Vuex sont mappés ici
     ...mapGetters({
+      // Accède à l'utilisateur courant via le getter 'getUser'
       currentUser: "getUser",
     }),
   },
 };
 </script>
+
 
 <style scoped>
 .account-button {

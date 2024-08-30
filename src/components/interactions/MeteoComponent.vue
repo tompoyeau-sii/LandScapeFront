@@ -90,97 +90,99 @@
 </template>
 
 <script>
-import openMeteoService from "@/services/openMeteoService";
+import openMeteoService from "@/services/openMeteoService"; // Importation du service pour obtenir les données météo
 
+// Définition des classes d'icônes et de styles pour différentes conditions météorologiques
 const iconClasses = {
   Ensoleillé: {
-    icon: "mdi-white-balance-sunny",
-    gradient:
-      "linear-gradient(56deg, rgba(255,245,91,1) 0%, rgba(255,199,95,1) 100%)",
-    textColor: "#000000",
-  }, // Or à Orange, texte noir
+    icon: "mdi-white-balance-sunny", // Icône pour les jours ensoleillés
+    gradient: "linear-gradient(56deg, rgba(255,245,91,1) 0%, rgba(255,199,95,1) 100%)", // Dégradé de fond pour les jours ensoleillés
+    textColor: "#000000", // Couleur du texte pour les jours ensoleillés
+  },
   Nuageux: {
-    icon: "mdi-cloud-outline",
-    gradient:
-      "linear-gradient(56deg, rgba(176,196,222,1) 0%, rgba(214,210,210,1) 100%)",
-    textColor: "#000000",
-  }, // Bleu clair à Gris, texte noir
+    icon: "mdi-cloud-outline", // Icône pour les jours nuageux
+    gradient: "linear-gradient(56deg, rgba(176,196,222,1) 0%, rgba(214,210,210,1) 100%)", // Dégradé de fond pour les jours nuageux
+    textColor: "#000000", // Couleur du texte pour les jours nuageux
+  },
   Brouillard: {
-    icon: "mdi-weather-fog",
-    gradient: "linear-gradient(to right, #A9A9A9, #696969)",
-    textColor: "#FFFFFF",
-  }, // Gris à Gris foncé, texte blanc
+    icon: "mdi-weather-fog", // Icône pour les jours brouillés
+    gradient: "linear-gradient(to right, #A9A9A9, #696969)", // Dégradé de fond pour les jours brouillés
+    textColor: "#FFFFFF", // Couleur du texte pour les jours brouillés
+  },
   Bruine: {
-    icon: "mdi-weather-rainy",
-    gradient: "linear-gradient(to right, #87CEEB, #4682B4)",
-    textColor: "#000000",
-  }, // Bleu ciel à Bleu acier, texte noir
+    icon: "mdi-weather-rainy", // Icône pour les jours avec bruine
+    gradient: "linear-gradient(to right, #87CEEB, #4682B4)", // Dégradé de fond pour les jours avec bruine
+    textColor: "#000000", // Couleur du texte pour les jours avec bruine
+  },
   Pluie: {
-    icon: "mdi-weather-pouring",
-    gradient:
-      "linear-gradient(56deg, rgba(30,144,255,1) 0%, rgba(115,191,255,1) 100%)",
-    textColor: "#FFFFFF",
-  }, // Bleu acier à Bleu dodger, texte blanc
+    icon: "mdi-weather-pouring", // Icône pour les jours de pluie
+    gradient: "linear-gradient(56deg, rgba(30,144,255,1) 0%, rgba(115,191,255,1) 100%)", // Dégradé de fond pour les jours de pluie
+    textColor: "#FFFFFF", // Couleur du texte pour les jours de pluie
+  },
   Verglas: {
-    icon: "mdi-weather-snowy-rainy",
-    gradient: "linear-gradient(to right, #B0E0E6, #ADD8E6)",
-    textColor: "#000000",
-  }, // Bleu poudre à Bleu clair, texte noir
+    icon: "mdi-weather-snowy-rainy", // Icône pour les jours de verglas
+    gradient: "linear-gradient(to right, #B0E0E6, #ADD8E6)", // Dégradé de fond pour les jours de verglas
+    textColor: "#000000", // Couleur du texte pour les jours de verglas
+  },
   Neige: {
-    icon: "mdi-weather-snowy",
-    gradient: "linear-gradient(to right, #FFFFFF, #E0FFFF)",
-    textColor: "#000000",
-  }, // Blanc à Azur, texte noir
+    icon: "mdi-weather-snowy", // Icône pour les jours de neige
+    gradient: "linear-gradient(to right, #FFFFFF, #E0FFFF)", // Dégradé de fond pour les jours de neige
+    textColor: "#000000", // Couleur du texte pour les jours de neige
+  },
   Orage: {
-    icon: "mdi-weather-lightning",
-    gradient: "linear-gradient(to right, #FFA500, #FF4500)",
-    textColor: "#000000",
-  }, // Orange à Rouge orange, texte noir
+    icon: "mdi-weather-lightning", // Icône pour les jours d'orage
+    gradient: "linear-gradient(to right, #FFA500, #FF4500)", // Dégradé de fond pour les jours d'orage
+    textColor: "#000000", // Couleur du texte pour les jours d'orage
+  },
   "Code météo inconnu": {
-    icon: "mdi-help-circle-outline",
-    gradient: "linear-gradient(to right, #808080, #A9A9A9)",
-    textColor: "#FFFFFF",
-  }, // Gris à Gris foncé, texte blanc
+    icon: "mdi-help-circle-outline", // Icône pour les conditions météorologiques inconnues
+    gradient: "linear-gradient(to right, #808080, #A9A9A9)", // Dégradé de fond pour les conditions météorologiques inconnues
+    textColor: "#FFFFFF", // Couleur du texte pour les conditions météorologiques inconnues
+  },
 };
 
 export default {
   props: {
     route: {
-      type: Array,
+      type: Array, // La prop 'route' est un tableau requis
       required: true,
     },
   },
   data() {
     return {
-      dialogMeteo: false,
-      meteoFrom: null,
-      meteoTo: null,
-      next5HoursForecast: [],
-      next5HoursForecastFrom: [],
+      dialogMeteo: false, // Contrôle l'affichage du dialogue météo
+      meteoFrom: null, // Données météo pour le départ
+      meteoTo: null, // Données météo pour l'arrivée
+      next5HoursForecast: [], // Prévisions pour les 5 prochaines heures
+      next5HoursForecastFrom: [], // Prévisions pour les 5 prochaines heures au départ
     };
   },
   watch: {
+    // Observateur pour la prop 'route' qui déclenche une fonction quand la route change
     route: {
       handler(newRoute) {
-        console.log(newRoute);
+        console.log(newRoute); // Affiche la nouvelle route dans la console pour le débogage
         if (newRoute && newRoute.length === 2) {
           const [start, end] = newRoute;
+          // Appelle la méthode pour obtenir les données météo pour le départ et l'arrivée
           this.getWeather(start[0], start[1], "meteoFrom");
           this.getWeather(end[0], end[1], "meteoTo");
         }
       },
-      deep: true,
+      deep: true, // Observateur en profondeur pour surveiller les changements dans les objets et les tableaux
     },
   },
   methods: {
+    // Méthode pour obtenir les données météo en fonction des coordonnées (latitude, longitude) et du type de météo (départ ou arrivée)
     async getWeather(lat, lon, meteoType) {
       try {
-        const date = new Date().toISOString().split("T")[0];
-        const weatherData = await openMeteoService.getWeather(lat, lon, date);
+        const date = new Date().toISOString().split("T")[0]; // Obtient la date actuelle au format YYYY-MM-DD
+        const weatherData = await openMeteoService.getWeather(lat, lon, date); // Appelle le service pour obtenir les données météo
         const now = new Date();
         let closestTimeIndex = 0;
         let closestTimeDiff = Infinity;
 
+        // Trouve l'heure la plus proche de l'heure actuelle
         for (let i = 0; i < weatherData.hourly.time.length; i++) {
           const weatherTime = new Date(weatherData.hourly.time[i]);
           const timeDiff = Math.abs(weatherTime - now);
@@ -191,15 +193,16 @@ export default {
           }
         }
 
-        const weatherCode = weatherData.hourly.weathercode[closestTimeIndex];
-        const weatherDescription = this.getWeatherDescription(weatherCode);
+        const weatherCode = weatherData.hourly.weathercode[closestTimeIndex]; // Code météo pour l'heure la plus proche
+        const weatherDescription = this.getWeatherDescription(weatherCode); // Description météo correspondante
         this[meteoType] = {
-          temperature: weatherData.hourly.temperature_2m[closestTimeIndex],
-          precipitation: weatherData.hourly.precipitation[closestTimeIndex],
-          weatherDescription: weatherDescription,
+          temperature: weatherData.hourly.temperature_2m[closestTimeIndex], // Température à l'heure la plus proche
+          precipitation: weatherData.hourly.precipitation[closestTimeIndex], // Précipitation à l'heure la plus proche
+          weatherDescription: weatherDescription, // Description météo à l'heure la plus proche
         };
+
+        // Extraire les prévisions pour les 5 prochaines heures
         if (meteoType === "meteoTo") {
-          console.log("test");
           this.next5HoursForecast = this.extractNext5HoursForecast(
             weatherData.hourly,
             closestTimeIndex
@@ -211,12 +214,10 @@ export default {
           );
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des données météo :",
-          error
-        );
+        console.error("Erreur lors de la récupération des données météo :", error); // Gestion des erreurs
       }
     },
+    // Méthode pour extraire les prévisions des 5 prochaines heures à partir des données horaires
     extractNext5HoursForecast(hourlyData, startIndex) {
       const next5Hours = [];
       for (let i = 0; i < 5; i++) {
@@ -226,16 +227,17 @@ export default {
           time: new Date(hourlyData.time[index]).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-          }),
-          temperature: hourlyData.temperature_2m[index],
+          }), // Formatage de l'heure
+          temperature: hourlyData.temperature_2m[index], // Température pour l'heure
           weatherDescription: this.getWeatherDescription(
             hourlyData.weathercode[index]
-          ),
-          precipitation: hourlyData.precipitation[index],
+          ), // Description météo pour l'heure
+          precipitation: hourlyData.precipitation[index], // Précipitation pour l'heure
         });
       }
       return next5Hours;
     },
+    // Méthode pour obtenir une description de la météo en fonction du code météo
     getWeatherDescription(weatherCode) {
       const weatherCodes = {
         0: "Ensoleillé",
@@ -268,22 +270,25 @@ export default {
         99: "Orage",
       };
 
-      return weatherCodes[weatherCode] || "Code météo inconnu";
+      return weatherCodes[weatherCode] || "Code météo inconnu"; // Retourne la description ou "Code météo inconnu"
     },
+    // Méthode pour obtenir l'icône correspondant à la description de la météo
     getWeatherIcon(weatherDescription) {
       return (
         iconClasses[weatherDescription] || iconClasses["Code météo inconnu"]
-      );
+      ); // Retourne les détails de l'icône ou les détails pour les conditions inconnues
     },
+    // Méthode pour obtenir le dégradé de fond correspondant à la description de la météo
     getWeatherGradient(weatherDescription) {
       return (
         iconClasses[weatherDescription] || iconClasses["Code météo inconnu"]
-      ).gradient;
+      ).gradient; // Retourne le dégradé de fond ou le dégradé pour les conditions inconnues
     },
+    // Méthode pour obtenir la couleur du texte correspondant à la description de la météo
     getWeatherTextColor(weatherDescription) {
       return (
         iconClasses[weatherDescription] || iconClasses["Code météo inconnu"]
-      ).textColor;
+      ).textColor; // Retourne la couleur du texte ou la couleur pour les conditions inconnues
     },
   },
 };

@@ -32,41 +32,39 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import apiService from '@/services/apiService';
+import { mapGetters } from 'vuex'; // Importation de la fonction mapGetters pour accéder aux getters Vuex
+import apiService from '@/services/apiService'; // Importation du service API pour les requêtes réseau
 
 export default {
   data: () => ({
-    menu: false,
+    menu: false, // État de l'ouverture du menu (false par défaut, donc le menu est fermé)
   }),
   computed: {
     ...mapGetters({
-      currentUser: 'getUser',
+      currentUser: 'getUser', // Utilisation de mapGetters pour mapper le getter 'getUser' de Vuex à une propriété calculée
     }),
     unreadNotifications() {
+      // Calcul des notifications non lues en filtrant les notifications du utilisateur courant
       return this.currentUser?.notifications?.filter(notification => !notification.isRead) ?? [];
     },
     unreadCount() {
+      // Calcul du nombre de notifications non lues
       return this.unreadNotifications.length;
     },
   },
   methods: {
     async markAsRead(notification) {
       try {
-        // Send the update to the server
+        // Envoi de la mise à jour au serveur pour marquer la notification comme lue
         await apiService.put(`/notifications/${notification.id}`, { isRead: true });
 
-        // Update the notification locally
+        // Mise à jour locale de la notification pour qu'elle soit marquée comme lue
         notification.isRead = true;
       } catch (error) {
-        console.error('échec de la mise en lecture:', error);
+        console.error('échec de la mise en lecture:', error); // Gestion des erreurs en cas d'échec de la mise à jour
       }
     },
   },
-  created() {
-    // console.log("Current User:", this.currentUser);
-    // console.log("Notifications non lues:", this.unreadNotifications);
-  }
 };
 </script>
 

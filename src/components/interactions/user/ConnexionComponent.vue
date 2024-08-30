@@ -51,26 +51,30 @@ import { mapActions, mapState } from "vuex";
 
 export default {
   data: () => ({
-    valid: false,
-    visible: false,
-    dialog: false,
-    email: "",
-    password: "",
-    emailError: "",
-    passwordError: "",
-    globalError: "",
+    valid: false, // Indique si le formulaire est valide
+    visible: false, // Contrôle la visibilité du mot de passe dans le champ de texte
+    dialog: false, // Contrôle l'état du dialogue de connexion (ouvert/fermé)
+    email: "", // Stocke l'adresse email saisie par l'utilisateur
+    password: "", // Stocke le mot de passe saisi par l'utilisateur
+    emailError: "", // Stocke les erreurs liées à l'email
+    passwordError: "", // Stocke les erreurs liées au mot de passe
+    globalError: "", // Stocke les erreurs globales de connexion
     rules: {
+      // Règles de validation pour les champs du formulaire
       required: (value) => !!value || "Ce champ est requis.",
       email: (value) => {
+        // Vérifie si l'email est valide selon une expression régulière
         const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return pattern.test(value) || "E-mail invalide.";
       },
     },
   }),
   computed: {
+    // Récupère l'état d'erreur d'authentification depuis le store Vuex
     ...mapState(["authError"]),
   },
   watch: {
+    // Surveille les changements de 'authError' et met à jour 'globalError'
     authError(newVal) {
       if (newVal) {
         this.globalError = newVal;
@@ -78,21 +82,28 @@ export default {
     },
   },
   methods: {
+    // Les actions du store Vuex sont mappées ici
     ...mapActions(["login"]),
+    
+    // Méthode pour gérer la soumission du formulaire de connexion
     async handleLogin() {
-      if (this.valid) {
-        this.clearErrors();
+      if (this.valid) { // Vérifie si le formulaire est valide
+        this.clearErrors(); // Efface les erreurs précédentes
 
         try {
+          // Appelle l'action 'login' pour tenter de connecter l'utilisateur
           await this.login({ email: this.email, password: this.password });
-          if (!this.authError) {
-            this.dialog = false;
+          if (!this.authError) { // Si aucune erreur d'authentification
+            this.dialog = false; // Ferme le dialogue de connexion
           }
         } catch (error) {
+          // Gère les erreurs de connexion en affichant un message générique
           this.globalError = "Une erreur s'est produite. Veuillez réessayer.";
         }
       }
     },
+    
+    // Méthode pour effacer les messages d'erreur
     clearErrors() {
       this.emailError = "";
       this.passwordError = "";
@@ -101,6 +112,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .account-btn {

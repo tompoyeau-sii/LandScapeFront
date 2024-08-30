@@ -13,50 +13,55 @@
 </template>
 
 <script>
-import mapApiService from '@/services/mapApiService';
-import { debounce } from 'lodash';
+import mapApiService from '@/services/mapApiService'; // Service pour interagir avec l'API de carte
+import { debounce } from 'lodash'; // Fonction de debounce pour limiter la fréquence des appels API lors de la saisie
 
 export default {
   props: {
-    searchOption: String,
-    type: String, // "from" or "to"
+    searchOption: String, // Valeur actuelle du champ de recherche
+    type: String, // Type de recherche : "from" ou "to"
   },
   data() {
     return {
-      options: [],
-      debouncedSearch: null, // add debouncedSearch to the data
+      options: [], // Liste des options de recherche récupérées
+      debouncedSearch: null, // Fonction debouncée pour limiter les appels à l'API
     };
   },
   watch: {
+    // Observe les changements dans la valeur de `searchOption` pour déclencher une recherche
     searchOption(newVal) {
-      this.debouncedSearch(newVal);
+      this.debouncedSearch(newVal); // Appelle la fonction debouncée avec la nouvelle valeur
     },
   },
   created() {
+    // Crée une version debouncée de la fonction `searchLocation`
     this.debouncedSearch = debounce(this.searchLocation, 500);
   },
   methods: {
     async searchLocation(newVal) {
+      // Effectue une recherche des options basées sur la valeur donnée
       if (newVal.length < 3) {
-        this.options = [];
+        this.options = []; // Vide les options si la saisie est trop courte
         return;
       }
       try {
-        const response = await mapApiService.searchLocation(newVal);
-        this.options = response;
-        console.log(response)
+        const response = await mapApiService.searchLocation(newVal); // Appelle le service pour obtenir les options
+        this.options = response; // Met à jour les options avec la réponse de l'API
+        console.log(response); // Affiche les options dans la console pour débogage
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des suggestions :",
           error
-        );
+        ); // Gestion des erreurs lors de la récupération des options
       }
     },
     selectOption(option) {
+      // Émet un événement lorsque l'utilisateur sélectionne une option
       this.$emit('option-selected', { option, type: this.type });
     },
   },
 };
+
 </script>
 
 <style>

@@ -139,72 +139,71 @@
 </template>
 
 <script>
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../plugins/firebaseConfig";
-import apiService from "@/services/apiService";
+import { createUserWithEmailAndPassword } from "firebase/auth"; // Importation de la fonction pour créer un utilisateur avec email et mot de passe depuis Firebase
+import { auth } from "../../../plugins/firebaseConfig"; // Importation de la configuration Firebase
+import apiService from "@/services/apiService"; // Importation d'un service API personnalisé pour les appels réseau
 
 export default {
   data() {
     return {
-      valid: false,
-      step: 1,
-      user: {
+      valid: false, // État de la validation du formulaire
+      step: 1, // Étape actuelle du formulaire (1 pour les informations utilisateur, 2 pour les informations entreprise)
+      user: { // Données liées à l'utilisateur
         firstName: "",
         lastName: "",
         birthDate: "",
         email: "",
         password: "",
-        isSub: false
+        isSub: false // Indicateur pour savoir si l'utilisateur est abonné (AEL)
       },
-      company: {
+      company: { // Données liées à l'entreprise
         name: "",
         siret: ""
       },
-      isAELChecked: false,
-      rules: {
-        required: (value) => !!value || "Ce champ est requis.",
+      isAELChecked: false, // Indicateur pour savoir si la case AEL est cochée
+      rules: { // Règles de validation pour les champs du formulaire
+        required: (value) => !!value || "Ce champ est requis.", // Validation pour les champs obligatoires
         email: (value) => {
-          const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          return pattern.test(value) || "E-mail invalide.";
+          const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expression régulière pour valider les adresses email
+          return pattern.test(value) || "E-mail invalide."; // Message d'erreur si l'email est invalide
         },
       },
     };
   },
   methods: {
     async handleSubmit() {
-      if (this.$refs.form.validate()) {
-        if (this.isAELChecked) {
-          this.step = 2; // Passer à la deuxième partie du formulaire
+      if (this.$refs.form.validate()) { // Vérifie si le formulaire est valide
+        if (this.isAELChecked) { // Si l'option AEL est cochée
+          this.step = 2; // Passe à l'étape 2 du formulaire
         } else {
-          await this.submit();
+          await this.submit(); // Soumet les informations utilisateur
         }
       }
     },
     async submit() {
-      if (this.$refs.form.validate()) {
+      if (this.$refs.form.validate()) { // Vérifie si le formulaire est valide
         try {
-          // Formatage des noms
+          // Formatage des noms pour la normalisation
           if (this.isAELChecked) {
-            this.step = 2;
+            this.step = 2; // Passe à l'étape 2 si AEL est coché
           } else {
             this.user.lastName =
               this.user.lastName.charAt(0).toUpperCase() +
-              this.user.lastName.slice(1).toLowerCase();
+              this.user.lastName.slice(1).toLowerCase(); // Capitalise la première lettre du nom
             this.user.firstName =
               this.user.firstName.charAt(0).toUpperCase() +
-              this.user.firstName.slice(1).toLowerCase();
+              this.user.firstName.slice(1).toLowerCase(); // Capitalise la première lettre du prénom
 
-            // Détermination de l'id du droit
+            // Détermination de l'ID du droit
             const rightId = 1;
 
-            // Envoyer les données utilisateur à l'API Java Spring Boot
-
+            // Création de l'utilisateur avec Firebase
             const userCredential = await createUserWithEmailAndPassword(
               auth,
               this.user.email,
               this.user.password
             );
-            const user = userCredential.user;
+            const user = userCredential.user; // Obtention des données utilisateur
 
             const userData = {
               name: this.user.lastName,
@@ -214,24 +213,25 @@ export default {
               uId: user.uid,
               right: { id: rightId },
             };
-            this.userUid = user.uid;
+            this.userUid = user.uid; // Stockage de l'UID de l'utilisateur
 
-            await apiService.post("/users", userData);
-            this.$router.push("/");
+            await apiService.post("/users", userData); // Envoi des données utilisateur à l'API
+            this.$router.push("/"); // Redirection vers la page d'accueil après l'inscription
             console.log("Utilisateur inscrit et connecté:", this.user);
 
           }
         } catch (err) {
-          console.error("Erreur d'inscription:", err);
+          console.error("Erreur d'inscription:", err); // Gestion des erreurs lors de l'inscription
         }
       }
     },
     async submitCompany() {
-      if (this.$refs.form.validate()) {
+      if (this.$refs.form.validate()) { // Vérifie si le formulaire est valide
         try {
-          // Accéder aux détails de l'utilisateur actuel stockés dans les données du composant
+          // Accède aux détails de l'utilisateur
           const { firstName, lastName, birthDate, email, password, isSub } = this.user;
 
+          // Création de l'utilisateur avec Firebase
           const userCredential = await createUserWithEmailAndPassword(
             auth,
             this.user.email,
@@ -247,7 +247,7 @@ export default {
             this.user.firstName.charAt(0).toUpperCase() +
             this.user.firstName.slice(1).toLowerCase();
 
-          // Détermination de l'id du droit
+          // Détermination de l'ID du droit
           const rightId = 3;
 
           const companyData = {
@@ -267,20 +267,21 @@ export default {
             },
           };
           
-          apiService.post("/companies/createWithUser", companyData);
+          await apiService.post("/companies/createWithUser", companyData); // Envoi des données utilisateur et entreprise à l'API
           console.log("Entreprise créée avec l'utilisateur:", companyData);
-          this.$router.push("/");
+          this.$router.push("/"); // Redirection vers la page d'accueil après la création de l'entreprise
         } catch (err) {
-          console.error("Erreur d'ajout de l'entreprise:", err);
+          console.error("Erreur d'ajout de l'entreprise:", err); // Gestion des erreurs lors de l'ajout de l'entreprise
         }
       }
     },
     retourPagePrecedente() {
-      this.$router.go(-1);
+      this.$router.go(-1); // Retourne à la page précédente
     },
   },
 };
 </script>
+
 
 
 <style scoped>

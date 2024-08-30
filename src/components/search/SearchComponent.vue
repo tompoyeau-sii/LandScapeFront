@@ -107,29 +107,30 @@
 
 
 <script>
-import mapApiService from "@/services/mapApiService";
-import geolocationService from "@/services/geolocationService";
-import town from "./TownList.vue";
-import { debounce } from "lodash"; // Importation de lodash
+import mapApiService from "@/services/mapApiService"; // Service pour interagir avec l'API de carte
+import geolocationService from "@/services/geolocationService"; // Service pour obtenir la géolocalisation de l'utilisateur
+import town from "./TownList.vue"; // Composant pour afficher la liste des villes
+import { debounce } from "lodash"; // Fonction de debounce pour limiter la fréquence des appels API lors de la saisie
 
 export default {
-  components: { town },
+  components: { town }, // Déclaration des composants enfants utilisés dans le template
   data() {
     return {
-      from: "",
-      dialogMeteo: false,
-      to: "",
-      waypoints: [],
-      route: [],
-      dragging: false,
-      dragIndex: null,
-      dragOverIndex: null,
-      showFromOptions: false,
-      showToOptions: false,
+      from: "", // Valeur du champ de départ
+      dialogMeteo: false, // État pour contrôler la visibilité du dialogue météo (non utilisé ici)
+      to: "", // Valeur du champ de destination
+      waypoints: [], // Liste des étapes (waypoints) pour le parcours
+      route: [], // Détails de l'itinéraire calculé
+      dragging: false, // État pour savoir si un élément est en train d'être déplacé
+      dragIndex: null, // Index de l'étape en cours de déplacement
+      dragOverIndex: null, // Index de l'étape au-dessus de laquelle l'élément est déplacé
+      showFromOptions: false, // État pour afficher les options de recherche pour le champ de départ
+      showToOptions: false, // État pour afficher les options de recherche pour le champ de destination
     };
   },
   methods: {
     async handleOptionSelected({ option, type }) {
+      // Gère la sélection d'une option de recherche
       const latitude = parseFloat(option.coordinates[1]);
       const longitude = parseFloat(option.coordinates[0]);
 
@@ -146,23 +147,24 @@ export default {
           this.$emit("locationSelected", { lat: latitude, lng: longitude });
         }
       }
-      this.updateRoute();
+      this.updateRoute(); // Met à jour l'itinéraire après la sélection d'une option
     },
 
     async updateRoute() {
+      // Met à jour l'itinéraire en fonction des valeurs des champs de départ, d'étape et de destination
       try {
         let fromCoords;
         if (this.from) {
-          fromCoords = await mapApiService.getCoordinates(this.from);
+          fromCoords = await mapApiService.getCoordinates(this.from); // Obtient les coordonnées du champ de départ
         } else {
-          const position = await geolocationService.getCurrentPosition();
+          const position = await geolocationService.getCurrentPosition(); // Obtient la position actuelle si le champ de départ est vide
           fromCoords = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
         }
 
-        const toCoords = await mapApiService.getCoordinates(this.to);
+        const toCoords = await mapApiService.getCoordinates(this.to); // Obtient les coordonnées du champ de destination
         this.route = {
           coordinates: [
             [fromCoords.lat, fromCoords.lng],
@@ -174,54 +176,57 @@ export default {
           if (waypoint.location) {
             const waypointCoords = await mapApiService.getCoordinates(
               waypoint.location
-            );
+            ); // Obtient les coordonnées pour chaque étape
             this.route.waypoints.push([waypointCoords.lat, waypointCoords.lng]);
           }
         }
-        console.log(this.route);
+        console.log(this.route); // Affiche les détails de l'itinéraire dans la console
 
-        this.$emit("selectRoute", this.route);
+        this.$emit("selectRoute", this.route); // Émet un événement avec les détails de l'itinéraire sélectionné
       } catch (error) {
         console.error(
           "Erreur lors de la récupération de l'itinéraire :",
           error
-        );
+        ); // Gestion des erreurs lors de la récupération des coordonnées
       }
     },
 
     async useCurrentLocation() {
+      // Utilise la position actuelle comme point de départ
       try {
-        const position = await geolocationService.getCurrentPosition();
+        const position = await geolocationService.getCurrentPosition(); // Obtient la position actuelle
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        const locationData = await mapApiService.getLocationData(lat, lng);
+        const locationData = await mapApiService.getLocationData(lat, lng); // Obtient les données de localisation pour les coordonnées actuelles
         const option = {
           coordinates: [lng.toString(), lat.toString()],
           label: locationData.city,
         };
-        this.handleOptionSelected({ option, type: "from" });
+        this.handleOptionSelected({ option, type: "from" }); // Sélectionne l'option comme point de départ
         this.from = locationData.city;
-        this.updateRoute();
+        this.updateRoute(); // Met à jour l'itinéraire
       } catch (error) {
         if (error.code === 1) {
-          console.error("Erreur de géolocalisation :", error);
+          console.error("Erreur de géolocalisation :", error); // Gestion des erreurs liées à la géolocalisation
         }
       }
     },
 
     addWaypoint() {
+      // Ajoute une nouvelle étape au parcours
       this.waypoints.push({ location: "", options: [] });
     },
 
     async searchWaypointOptions(index) {
+      // Recherche des options pour une étape spécifique
       const waypoint = this.waypoints[index];
       if (waypoint.location.length < 3) {
-        waypoint.options = [];
+        waypoint.options = []; // Vide les options si la saisie est trop courte
         return;
       }
       try {
-        const options = await mapApiService.searchLocation(waypoint.location);
+        const options = await mapApiService.searchLocation(waypoint.location); // Obtient les suggestions de localisation
         this.waypoints[index] = { ...waypoint, options };
       } catch (error) {
         console.error(
@@ -229,24 +234,27 @@ export default {
             index + 1
           } :`,
           error
-        );
+        ); // Gestion des erreurs lors de la recherche des options
       }
     },
 
     removeWaypoint(index) {
+      // Supprime une étape spécifique
       this.waypoints.splice(index, 1);
-      this.updateRoute();
+      this.updateRoute(); // Met à jour l'itinéraire après la suppression
     },
 
     selectWaypointOption(index, option) {
+      // Sélectionne une option pour une étape spécifique
       this.waypoints[index] = {
         location: option.label,
         options: [],
       };
-      this.updateRoute();
+      this.updateRoute(); // Met à jour l'itinéraire après la sélection de l'option
     },
 
     stopRoute() {
+      // Réinitialise le formulaire et émet un événement pour arrêter la recherche
       this.from = "";
       this.to = "";
       this.waypoints = [];
@@ -254,24 +262,28 @@ export default {
     },
 
     showFromList() {
+      // Affiche les options pour le champ de départ
       this.showFromOptions = true;
       this.showToOptions = false;
     },
 
     showToList() {
+      // Affiche les options pour le champ de destination
       this.showToOptions = true;
       this.showFromOptions = false;
     },
 
     startDrag(event, index) {
+      // Déclenche le début du drag pour une étape spécifique
       this.dragging = true;
       this.dragIndex = index;
       this.dragStartY = event.clientY;
-      document.addEventListener("mousemove", this.onDrag);
-      document.addEventListener("mouseup", this.endDrag);
+      document.addEventListener("mousemove", this.onDrag); // Écouteur pour le déplacement de la souris
+      document.addEventListener("mouseup", this.endDrag); // Écouteur pour la fin du drag
     },
 
     onDrag(event) {
+      // Gère le déplacement de l'étape pendant le drag
       if (!this.dragging) return;
 
       const dragOverElement = document.elementFromPoint(
@@ -289,6 +301,7 @@ export default {
     },
 
     endDrag() {
+      // Termine le drag et réorganise les étapes
       if (this.dragging && this.dragOverIndex !== null) {
         const [removed] = this.waypoints.splice(this.dragIndex, 1);
         this.waypoints.splice(this.dragOverIndex, 0, removed);
@@ -298,16 +311,17 @@ export default {
       this.dragOverIndex = null;
       document.removeEventListener("mousemove", this.onDrag);
       document.removeEventListener("mouseup", this.endDrag);
-      this.updateRoute();
+      this.updateRoute(); // Met à jour l'itinéraire après le drag
     },
   },
   created() {
     this.debouncedSearchWaypointOptions = debounce(
       this.searchWaypointOptions,
       500
-    );
+    ); // Crée une version debouncée de la fonction de recherche des options d'étape
   },
 };
+
 </script>
 
 <style scoped>

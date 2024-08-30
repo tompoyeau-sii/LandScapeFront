@@ -59,27 +59,28 @@
   </div>
 </template>
 <script>
-import { reactive } from "vue";
+import { reactive } from "vue"; // Importation de la fonction reactive depuis Vue pour créer des objets réactifs
 
 export default {
   props: {
     poiList: {
-      type: Array,
-      required: true,
+      type: Array, // Liste des points d'intérêt
+      required: true, // Propriété requise
     },
     aelPoiList: {
-      type: Array,
-      required: true,
+      type: Array, // Liste des points d'intérêt "AEL"
+      required: true, // Propriété requise
     },
   },
   setup() {
-    const ratings = reactive({});
+    const ratings = reactive({}); // Crée un objet réactif pour stocker les évaluations des points d'intérêt
 
     function getRandomRating(id) {
+      // Fonction pour obtenir une note aléatoire pour un point d'intérêt donné
       if (!ratings[id]) {
-        ratings[id] = (Math.random() * 5).toFixed(1); // Générer une note aléatoire entre 0 et 5
+        ratings[id] = (Math.random() * 5).toFixed(1); // Génère une note aléatoire entre 0 et 5 avec une décimale
       }
-      return parseFloat(ratings[id]);
+      return parseFloat(ratings[id]); // Retourne la note en tant que nombre flottant
     }
 
     return {
@@ -89,25 +90,29 @@ export default {
   },
   computed: {
     filteredPoiList() {
-      const uniqueNames = new Set();
+      // Filtre la liste des points d'intérêt en supprimant les doublons basés sur le nom de tags
+      const uniqueNames = new Set(); // Utilise un Set pour garder une trace des noms uniques
       return this.poiList.filter((poi) => {
         if (poi.tags && poi.tags.name && !uniqueNames.has(poi.tags.name)) {
-          uniqueNames.add(poi.tags.name);
+          uniqueNames.add(poi.tags.name); // Ajoute le nom au Set pour éviter les doublons
           return true;
         }
         return false;
       });
     },
     allPoisList() {
-    return [...this.aelPoiList, ...this.filteredPoiList];
-  }
+      // Combine les listes de points d'intérêt "AEL" et filtrés
+      return [...this.aelPoiList, ...this.filteredPoiList];
+    }
   },
   methods: {
     selectPoi(poi) {
+      // Émet un événement avec le point d'intérêt sélectionné
       this.$emit("poi-selected", poi);
     },
   },
 };
+
 </script>
 
 <style scoped>

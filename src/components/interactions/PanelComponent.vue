@@ -12,29 +12,31 @@
 </template>
 
 <script>
-import Connexion from "@/components/interactions/user/ConnexionComponent.vue";
-import NotificationList from "@/components/interactions/NotificationList.vue";
-import Account from "@/components/interactions/user/AccountComponent.vue";
-import { mapState } from "vuex";
-import Meteo from "@/components/interactions/MeteoComponent.vue";
+import Connexion from "@/components/interactions/user/ConnexionComponent.vue"; // Importation du composant Connexion pour l'affichage de la connexion
+import NotificationList from "@/components/interactions/NotificationList.vue"; // Importation du composant NotificationList pour afficher les notifications
+import Account from "@/components/interactions/user/AccountComponent.vue"; // Importation du composant Account pour l'affichage des informations de l'utilisateur
+import { mapState } from "vuex"; // Importation de la fonction mapState pour accéder à l'état Vuex
+import Meteo from "@/components/interactions/MeteoComponent.vue"; // Importation du composant Meteo pour afficher les informations météo
+
 export default {
   props: {
     route: {
       type: Array,
-      required: true,
+      required: true, // La prop 'route' est requise et doit être un tableau
     }
   },
   components: {
-    NotificationList,
-    Connexion,
-    Account,
-    Meteo
+    NotificationList, // Déclaration du composant NotificationList pour être utilisé dans le template
+    Connexion, // Déclaration du composant Connexion pour être utilisé dans le template
+    Account, // Déclaration du composant Account pour être utilisé dans le template
+    Meteo // Déclaration du composant Meteo pour être utilisé dans le template
   },
   computed: {
-    ...mapState(["user"]), // Ajoutez l'état de l'utilisateur depuis Vuex
+    ...mapState(["user"]), // Accès à l'état 'user' du store Vuex pour la réactivité du composant
   }
 };
 </script>
+
 
 
 <style>
