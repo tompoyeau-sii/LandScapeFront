@@ -57,32 +57,34 @@
 </template>
 
 <script>
-import apiService from "@/services/apiService";
+import apiService from "@/services/apiService"; // Importation du service API pour gérer les requêtes HTTP
 
 export default {
-  name: "HobbyComponent",
+  name: "HobbyComponent", // Nom du composant
   data() {
     return {
-      search: "",
-      hobbies: [],
-      categories: [],
-      headers: [
+      search: "", // Texte de recherche pour filtrer les hobbies
+      hobbies: [], // Liste des hobbies récupérés depuis l'API
+      categories: [], // Liste des catégories récupérées depuis l'API
+      headers: [ // En-têtes des colonnes du tableau de hobbies
         { title: "Libellé", align: "start", key: "label" },
         { title: "Catégories", align: "start", key: "categoryLabel" },
       ],
-      showModal: false,
+      showModal: false, // Contrôle l'affichage de la fenêtre modale pour ajouter un hobby
       newHobby: {
-        label: "",
-        categoryId: null,
+        label: "", // Libellé du nouveau hobby
+        categoryId: null, // ID de la catégorie associée au nouveau hobby
       }
     };
   },
   async mounted() {
+    // Méthode appelée lorsque le composant est monté, récupère les hobbies et les catégories
     await this.fetchHobbies();
     await this.fetchCategories();
   },
   methods: {
     async fetchHobbies() {
+      // Récupère la liste des hobbies depuis l'API et les stocke dans 'hobbies'
       try {
         const hobbies = await apiService.get("/hobbies");
         this.hobbies = hobbies;
@@ -91,6 +93,7 @@ export default {
       }
     },
     async fetchCategories() {
+      // Récupère la liste des catégories depuis l'API et les stocke dans 'categories'
       try {
         const categories = await apiService.get("/categories");
         this.categories = categories;
@@ -99,13 +102,14 @@ export default {
       }
     },
     async createHobby() {
-      if (this.$refs.form.validate()) {
+      // Crée un nouveau hobby en envoyant les données à l'API
+      if (this.$refs.form.validate()) { // Valide le formulaire avant l'envoi
         try {
           await apiService.post("/hobbies", this.newHobby);
-          this.showModal = false;
-          this.newHobby.label = "";
-          this.newHobby.categoryId = null;
-          await this.fetchHobbies();  // Fetch the updated list of hobbies
+          this.showModal = false; // Ferme la fenêtre modale après la création
+          this.newHobby.label = ""; // Réinitialise le champ du libellé
+          this.newHobby.categoryId = null; // Réinitialise le champ de la catégorie
+          await this.fetchHobbies();  // Rafraîchit la liste des hobbies après l'ajout
         } catch (error) {
           console.error("Erreur lors de la création du hobby:", error);
         }
@@ -113,6 +117,7 @@ export default {
     }
   }
 };
+
 </script>
 
 

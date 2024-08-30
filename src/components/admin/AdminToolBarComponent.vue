@@ -22,14 +22,19 @@
 export default {
   data () {
     return {
+      // La propriété 'drawer' contrôle l'état ouvert/fermé du tiroir de navigation
       drawer: true,
     }
   },
   methods: {
+    // Méthode pour naviguer vers une vue spécifique dans la section d'administration
     navigateTo(view) {
+      // Utilise le router Vue pour pousser une nouvelle route basée sur l'argument 'view'
       this.$router.push(`/administration/${view}`);
     },
+    // Méthode pour retourner à la page d'accueil
     goBack() {
+      // Utilise le router Vue pour retourner à la route racine ('/')
       this.$router.push('/');
     }
   }
